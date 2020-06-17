@@ -35,10 +35,6 @@ translations.en = {
     welcome = "Welcome to the noob module!"
 }
 
-translations.ph = {
-    welcome = "Welcome waiting for overjoy!"
-}
-
 
 
 -- [[ modes ]] --
