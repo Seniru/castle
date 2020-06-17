@@ -28,16 +28,26 @@ else
     module.subRoomAdmins = {module.roomAdmin}
 end
 
+-- [[ utilites]] --
+local utils = {}
+-- [[ {%require src/utils} ]] --
+
 -- [[ translations ]] --
 local translations = {}
 -- [[ {%require src/translations} ]] --
+
+module.translate = function(term, language, page, kwargs)
+    local translation = translations[lang] and translations[lang][term] or translations.en[term]
+    return string.format((page and translation[page] or translation), kwargs)
+end
+
 
 -- [[ modes ]] --
 local modes = {}
 -- [[ {%require src/modes} ]] --
 
 if modes[module.mode] then
-    modes[module.mode].main()
+    modes[module.mode].main(modes)
 else
-    print("no mode")
+    modes.castle.main()
 end
