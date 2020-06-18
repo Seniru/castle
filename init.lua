@@ -47,7 +47,7 @@ local modes = {}
 -- [[ {%require src/modes} ]] --
 
 if modes[module.mode] then
-    modes[module.mode].main(modes)
+    modes[module.mode].main()
 else
     modes.castle.main()
 end
