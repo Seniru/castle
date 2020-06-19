@@ -21,11 +21,15 @@ module.subRoomAdmins = {}
 if module.isTribeHouse then
     for name, player in next, tfm.get.room.playerList do
         if player.tribeName == module.room then
-            module.subRoomAdmins[#module.subRoomAdmins + 1] = name
+            module.subRoomAdmins[name] = true
         end
     end
 else
-    module.subRoomAdmins = {module.roomAdmin}
+    if module.roomAdmin ~= "" then module.subRoomAdmins = {[module.roomAdmin] = true} end
+end
+
+for admin in next, module.admins do
+    module.subRoomAdmins[admin] = true
 end
 
 -- [[ utilites]] --

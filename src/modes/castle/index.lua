@@ -1,5 +1,6 @@
 function()
 
+    system.disableChatCommandDisplay()
     tfm.exec.disableAfkDeath()
     tfm.exec.disableAutoNewGame()
     tfm.exec.disableAutoShaman()
@@ -31,7 +32,6 @@ function()
         if not closeSequence[id] then return end
         local sequence = closeSequence[id][target or "*"]
         for _, imgid in next, sequence.images do
-            print(imgid)
             tfm.exec.removeImage(imgid)
         end
         for _, txtareaid in next, sequence.txtareas do
@@ -41,13 +41,24 @@ function()
 
     -- [[main functions]] --
     displayModes = function(target)
-        local res = "<p align='center'><D><font size='16' face='Lucida console'>Castle - submodes</font></D><br><br>"
+        local commu = tfm.get.room.playerList[target].community
+        local res = module.translate("modestitle", commu)
         for name, mode in next, modes do
             if name ~= "castle" then
-                res = res .. "<b>castle0" .. name .. "</b> <a href='event:modeinfo:" .. name .. "'>ⓘ</a>\t<a href='event:play:" .. name .. "'>( Play )</a><br>"
+                res = res .. module.translate("modebrief", commu, nil, {name = name})
             end
         end
+        handleCloseButton(1, target)
         addTextArea(1, res .. "</p>", target, 200, 100, 400, 200, true)
+    end
+
+    displayMode = function(target, mode)
+        local commu = tfm.get.room.playerList[target].community
+        local name = mode
+        local mode = modes[mode]
+        local res = module.translate("modeinfo", commu, nil, {name = name, author = mode.author, version = mode.version, description = mode.description})
+        handleCloseButton(1, target)
+        addTextArea(1, res, target, 200, 100, 400, 200, true)
     end
 
     -- [[events]] --
@@ -59,6 +70,7 @@ function()
     eventNewPlayer = function(name)
         local commu = tfm.get.room.playerList[name].community
         tfm.exec.chatMessage(module.translate("welcome", commu), name)
+        tfm.exec.respawnPlayer(name)
     end 
 
     eventChatCommand = function(name, cmd)
@@ -70,13 +82,19 @@ function()
 
     eventTextAreaCallback = function(id, name, evt)
         if evt == "close" then
-            handleCloseButton(id, name)
+            handleCloseButton(id / 1000, name)
+        elseif evt == "modes" then
+            displayModes(name)
         elseif evt:find("%w+:%w+") then
             local key, value = table.unpack(string.split(evt, ":"))
             if key == "play" then
-                tfm.exec.chatMessage("<N>[</N><CS>•</CS><N>]</N> /room #castle0" .. value .. "@" .. name .. "</CS>", name)
+                tfm.exec.chatMessage("<N>[</N><D>•</D><N>]</N><D> /room #castle0" .. value .. "@" .. name .. "</D>", name)
+            elseif key == "modeinfo" then
+                displayMode(name, value)
             end
         end
     end
+
+    eventPlayerDied = tfm.exec.respawnPlayer
 
 end

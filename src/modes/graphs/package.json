@@ -1,7 +1,7 @@
 {
     "name": "graphs",
     "version": "v0.0.1",
-    "description": "",
+    "description": "Play with graphs! Feel the beauty of math",
     "author": "King_seniru#5890",
     "main": "index.lua"
 }
