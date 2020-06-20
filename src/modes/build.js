@@ -7,7 +7,7 @@ module.exports = () => {
     for (let dir of directories) {
         let mode = require(`./${dir}/package.json`)
         res += `modes.${mode.name} = {\n\tversion = "${mode.version}",\n\tdescription = "${mode.description}",\n\tauthor = "${mode.author}"\n}\n\n`
-        res += `modes.${mode.name}.main = ${fs.readFileSync("src/modes/" + dir + "/" + mode.main)}\n`
+        res += `modes.${mode.name}.main = ${fs.readFileSync("src/modes/" + dir + "/" + mode.main)}\n\n`
     }
     return res
 }

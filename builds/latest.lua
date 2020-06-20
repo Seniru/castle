@@ -75,7 +75,9 @@ translations.en = {
     modebrief = "<b>castle0${name}</b> <CH><a href='event:modeinfo:${name}'>ⓘ</a></CH>\t<a href='event:play:${name}'><T>( Play )</T></a><br>",
     modeinfo = "<p align='center'><D><font size='16' face='Lucida console'>#castle0${name}</font></D></p><br><i><font color='#ffffff' size='14'>“<br>${description}<br><p align='right'>”</p></font></i><b>Author: </b> ${author}<br><b>Version: </b> ${version}</font><br><br><p align='center'><b><a href='event:play:${name}'><T>( Play )</T></a></b></p><br><br><a href='event:modes'>« Back</a>",
     new_roomadmin = "<N>[</N><D>•</D><N>] </N><D>${name}</D> <N>is now a room admin!</N>",
-    error_auth = "<N>[</N><R>•</R><N>] Error: Authorisation",
+    error_adminexists = "<N>[</N><R>•</R><N>] <R>Error: ${name} is already an admin</R>",
+    admins = "<N>[</N><D>•</D><N>] </N><D>Admins: </D>",
+    error_auth = "<N>[</N><R>•</R><N>] <R>Error: Authorisation</R>",
     welcome0graphs = "<br><N><p align='center'>Welcoem to <b><D>#castle0graphs</D></b><br>Report any bugs or suggest interesting functions to <b><O>King_seniru</O><G><font size='8'>#5890</font></G></b><br><br>Type <b><BV>!commands</BV></b> to check out the available commands</p></N><br>",
     cmds0graphs = "<BV>!admin <name></BV> - Makes a player admin <R><i>(admin only command)</i></R>",
 }
@@ -194,6 +196,151 @@ modes.castle.main = function()
     end
 
     eventPlayerDied = tfm.exec.respawnPlayer
+
+end
+
+
+modes.fashion = {
+	version = "v0.0.1",
+	description = "Fashion show!",
+	author = "King_seniru#5890"
+}
+
+modes.fashion.main = function()
+    
+    system.disableChatCommandDisplay()
+    tfm.exec.disableAfkDeath()
+    tfm.exec.disableAutoNewGame()
+    tfm.exec.disableAutoShaman()
+    tfm.exec.newGame(0)
+    
+
+    local players = {}
+    -- copied shamelessly from Utility (https://github.com/imliam/Transformice-Utility/blob/master/utility.lua#L5128)
+    local omos = {"omo","@_@","@@","è_é","e_e","#_#",";A;","owo","(Y)(omo)(Y)","©_©","OmO","0m0","°m°","(´°?°`)","~(-_-)~","{^-^}", "uwu", "o3o"}
+
+    -- [[chat commands]] --
+    local chatCmds = {
+
+        admin = function(name, commu, args)
+            if players[args[1]] then
+                if module.subRoomAdmins[name] then
+                    if module.subRoomAdmins[args[1]] then return tfm.exec.chatMessage(module.translate("error_adminexists", commu, nil, {name = args[1]}), name) end
+                    module.subRoomAdmins[args[1]] = true
+                    tfm.exec.chatMessage(module.translate("new_roomadmin", tfm.get.room.community, nil, {name = args[1]}))
+                else
+                    tfm.exec.chatMessage(module.translate("error_auth", commu), name)
+                end
+            end
+        end,
+
+        admins = function(name, commu, args)
+            local res = module.translate("admins", commu) .. "<N>"
+            for admin in next, module.subRoomAdmins do
+                if players[admin] then res = res .. admin .. " " end
+            end
+            tfm.exec.chatMessage(res .. "</N>", name)
+        end,
+
+        s = function(name, commu, args)
+            if module.subRoomAdmins[name] then
+                if players[args[1]] then 
+                    tfm.exec.setShaman(args[1])
+                elseif args[1] == "me" then
+                    tfm.exec.setShaman(name)
+                elseif args[1] == "all" then
+                    for player in next, players do
+                        tfm.exec.setShaman(player)
+                    end
+                elseif args[1] == "admins" then
+                    for admin in next, module.subRoomAdmins do
+                        tfm.exec.setShaman(admin)
+                    end
+                end
+            else
+                tfm.exec.chatMessage(module.translate("error_auth", commu), name)
+            end
+        end,
+
+        tp = function(name, commu, args)
+            if module.subRoomAdmins[name] then
+                system.bindMouse(name)
+                players[name].clicks = { tp = args[1] }
+            else
+                tfm.exec.chatMessage(module.translate("error_auth", commu), name)
+            end
+        end,
+
+        omo = function(name, commu, args)
+            if module.subRoomAdmins[name] then
+                players[name].clicks = { omo = #args > 0 and table.concat(args, " ") or omos[math.random(1, #omos)]}
+                system.bindMouse(name)
+            else
+                tfm.exec.chatMessage(module.translate("error_auth", commu), name)
+            end
+        end
+
+    }
+    
+    -- [[ helper functions ]] --
+    omo = function(id, content, target, x, y, w, h, size, border, fixed)
+        ui.addTextArea(id * 1000 + 1,"<p align='center'><b><font color='#000000' size='" .. size .. "' face='Soopafresh,Segoe,Verdana'>" .. content .. "</font></b></p>", target, x - border, y, w, h, nil, nil, 0, fixed)
+        ui.addTextArea(id * 1000 + 2,"<p align='center'><b><font color='#000000' size='" .. size .. "' face='Soopafresh,Segoe,Verdana'>" .. content .. "</font></b></p>", target, x, y - border, w, h, nil, nil, 0, fixed)
+        ui.addTextArea(id * 1000 + 3,"<p align='center'><b><font color='#000000' size='" .. size .. "' face='Soopafresh,Segoe,Verdana'>" .. content .. "</font></b></p>", target, x + border, y, w, h, nil, nil, 0, fixed)
+        ui.addTextArea(id * 1000 + 4,"<p align='center'><b><font color='#000000' size='" .. size .. "' face='Soopafresh,Segoe,Verdana'>" .. content .. "</font></b></p>", target, x, y + border, w, h, nil, nil, 0, fixed)
+        ui.addTextArea(id * 1000,"<p align='center'><b><font size='" .. size .. "' face='Soopafresh,Segoe,Verdana'>" .. content .. "</font></b></p>", target, x, y, w, h, nil, nil, 0, fixed)
+    end
+    
+    -- [[ events]] --
+
+    eventMouse = function(name, x, y)
+        if players[name].clicks.tp then
+            local tpType = players[name].clicks.tp
+            if players[tpType] then 
+                tfm.exec.movePlayer(tpType, x, y)
+            elseif tpType == "me" then
+                tfm.exec.movePlayer(name, x, y)
+            elseif tpType == "all" then
+                for player in next, players do
+                    tfm.exec.movePlayer(player, x, y)
+                end
+            elseif tpType == "admins" then
+                for admin in next, module.subRoomAdmins do
+                    tfm.exec.movePlayer(admin, x, y)
+                end
+            end
+            players[name].clicks = {}
+            system.bindMouse(name, false)
+        elseif players[name].clicks.omo then
+            omo(0, players[name].clicks.omo, nil, x, y, nil, nil, 40, 2, false)
+            players[name].clicks = {}
+            system.bindMouse(name, false)
+        end
+    end
+
+    eventChatCommand = function(name, cmd)
+        local commu = tfm.get.room.playerList[name].community
+        local args = string.split(cmd, " ")
+        if chatCmds[args[1]] then
+            local cmd = args[1]
+            table.remove(args, 1)
+            chatCmds[cmd](name, commu, args)
+        end
+    end
+
+    eventNewPlayer = function(name)
+        players[name] = {clicks = {}}
+    end
+
+    eventPlayerLeft = function(name)
+        players[name] = nil
+    end
+
+    eventNewGame = function()
+        for name, player in next, tfm.get.room.playerList do
+            eventNewPlayer(name)
+        end
+    end
 
 end
 
@@ -347,6 +494,7 @@ modes.graphs.main = function()
             tfm.exec.chatMessage(module.translate("cmds0graphs"), name)
         elseif args[1] == "admin" and tfm.get.room.playerList[args[2]] then
             if module.subRoomAdmins[name] then
+                if module.subRoomAdmins[args[2]] then return tfm.exec.chatMessage(module.translate("error_adminexists", commu, nil, {name = args[2]}), name) end
                 module.subRoomAdmins[args[2]] = true
                 tfm.exec.chatMessage(module.translate("new_roomadmin", tfm.get.room.community, nil, {name = args[2]}))
                 local counter = 0
@@ -361,6 +509,7 @@ modes.graphs.main = function()
     end
 
 end
+
 
 
 if modes[module.mode] then

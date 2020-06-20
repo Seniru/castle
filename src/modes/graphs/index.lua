@@ -142,6 +142,7 @@ function()
             tfm.exec.chatMessage(module.translate("cmds0graphs"), name)
         elseif args[1] == "admin" and tfm.get.room.playerList[args[2]] then
             if module.subRoomAdmins[name] then
+                if module.subRoomAdmins[args[2]] then return tfm.exec.chatMessage(module.translate("error_adminexists", commu, nil, {name = args[2]}), name) end
                 module.subRoomAdmins[args[2]] = true
                 tfm.exec.chatMessage(module.translate("new_roomadmin", tfm.get.room.community, nil, {name = args[2]}))
                 local counter = 0
