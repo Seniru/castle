@@ -28,3 +28,13 @@ table.tostring = function(tbl, depth)
     end
     return res:sub(1, res:len() - 2) .. "}"
 end
+
+table.merge = function(tbl1, tbl2)
+    local res = {}
+    for _, tbl in next, ({tbl1, tbl2}) do
+        for k, v in next, tbl do
+            res[k] = v
+        end
+    end
+    return res
+end
