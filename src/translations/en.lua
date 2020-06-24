@@ -13,20 +13,23 @@ translations.en = {
         "<b>Title</b>: <a href='event:fs:title'>${title}</a><br>" ..
         "<b>Description</b>: <a href='event:fs:desc'>${desc}</a><br>" ..
         "<b>Prize</b>: <a href='event:fs:prize'>${prize}<br><br></a>" ..
-        "<b>Participants</b>: ${participants}<a href='event:fs:participants'> (See all)</a><br>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br>" ..
-        "<b><font size='15'><D>Room settings</D></font></b><br><br>" ..
+        "<b>Participants</b>: ${participants}<a href='event:fs:participants'> (See all)</a><br><br><p align='center'>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br>" ..
+        "<b><font size='13'><D>Room settings</D></font></b></p>" ..
         "<b>Map</b>: <a href='event:fs:map'>${map}</a><br>" ..
         "<b>Password</b>: <a href='event:fs:password'>${pw}</a><br>" ..
         "<b>Max participants</b>: <a href='event:fs:maxplayers'>${maxPlayers}</a><br>" ..
-        "<br><b><font size='15'>Mouse spawn locations</font></b><br><br>" ..
-        "<b>Spectator spawn</b>: <a href='event:fs:specSpawn'> X: ${specX}, Y: ${specY}</a><br>" ..
-        "<b>Participant spawn</b>: <a href='event:fs:playerSpawn'> X: ${playerX}, Y: ${playerY}</a><br>" ..
-        "<b>Player (out) spawn</b>: <a href='event:fs:outSpawn'> X: ${outX}, Y: ${outY}</a><br>",
+        "<br><b><font size='13'>Mouse spawn locations</font></b><br><br>" ..
+        "<b>Spectator spawn</b>: <a href='event:fs:specSpawn'> X: ${specX}, Y: ${specY}</a>\t\t<a href='event:fs:showSpecSpawn'>[ Show ]</a><br>" ..
+        "<b>Participant spawn</b>: <a href='event:fs:playerSpawn'> X: ${playerX}, Y: ${playerY}</a>\t\t<a href='event:fs:showPlayerSpawn'>[ Show ]</a><br>" ..
+        "<b>Player (out) spawn</b>: <a href='event:fs:outSpawn'> X: ${outX}, Y: ${outY}\t\t<a href='event:fs:showOutSpawn'>[ Show ]</a><br>",
     fs_title_popup = "Please enter the title of the fashion show!",
     fs_desc_popup = "Please enter the description of the fashion show!",
     fs_prize_popup = "Please enter the prize of the fashion show!",
     fs_maxp_popup = "Please specify the maximum amount of players for the fashion show!",
     fs_pw_popup = "Please enter the password, leave it blank to unset it <i>(alias command: !pw)</i>",
     fs_participants = "<p align='center'><b><D>Participants</D></b></p><br>",
-    fs_map_popup = "Please enter the map code!"
+    fs_map_popup = "Please enter the map code!",
+    fs_set_coords = "<N>[</N><D>•</D><N>] Please click on the map to set coordinates</N>",
+    fs_start = "<p align='center'><a href='event:start'><b>Start</b></a></p>",
+    fs_starting = "<N>[</N><D>•</D><N>]</N> <D>Starting the fashion show!</D>"
 }

@@ -1,11 +1,14 @@
 function()
     
+    -- [[ dependencies]] --
+    --[ timers4tfm ]--
+    local a={}a.__index=a;a._timers={}setmetatable(a,{__call=function(b,...)return b.new(...)end})function a.process()local c=os.time()local d={}for e,f in next,a._timers do if f.isAlive and f.mature<=c then f:call()if f.loop then f:reset()else f:kill()d[#d+1]=e end end end;for e,f in next,d do a._timers[f]=nil end end;function a.new(g,h,i,j,...)local self=setmetatable({},a)self.id=g;self.callback=h;self.timeout=i;self.isAlive=true;self.mature=os.time()+i;self.loop=j;self.args={...}a._timers[g]=self;return self end;function a:setCallback(k)self.callback=k end;function a:addTime(c)self.mature=self.mature+c end;function a:setLoop(j)self.loop=j end;function a:setArgs(...)self.args={...}end;function a:call()self.callback(table.unpack(self.args))end;function a:kill()self.isAlive=false end;function a:reset()self.mature=os.time()+self.timeout end;Timer=a
+
     system.disableChatCommandDisplay()
     tfm.exec.disableAfkDeath()
     tfm.exec.disableAutoNewGame()
     tfm.exec.disableAutoShaman()
     tfm.exec.newGame(0)
-    
 
     -- [[ game variables ]] --
     local players = {}
@@ -15,6 +18,7 @@ function()
     local started = false
     local round = 0
     local participants = {}
+    local participantCount = 0
 
     local settings = {
         title = "",
@@ -22,7 +26,10 @@ function()
         prize = "",
         maxPlayers = 100,
         pw = "",
-        map = 0
+        map = 0,
+        specSpawn = {},
+        playerSpawn = {},
+        outSpawn = {}
     }
 
     -- [[chat commands]] --
@@ -34,6 +41,7 @@ function()
                     if module.subRoomAdmins[args[1]] then return tfm.exec.chatMessage(module.translate("error_adminexists", commu, nil, {name = args[1]}), name) end
                     module.subRoomAdmins[args[1]] = true
                     tfm.exec.chatMessage(module.translate("new_roomadmin", tfm.get.room.community, nil, {name = args[1]}))
+                    if not started then displayConfigMenu(args[1]) end
                 else
                     tfm.exec.chatMessage(module.translate("error_auth", commu), name)
                 end
@@ -97,26 +105,31 @@ function()
         end,
         -- description config
         [101] = function(value, target, commu)
-            print("came here")
             settings.desc = value
             displayConfigMenu(target)
         end,
         -- prize config
         [102] = function(value, target, commu)
             settings.prize = value
-            print("hmm?")
             displayConfigMenu(target)
         end,
+        -- max participants config
+        [103] = function(value, target, commu)
+            settings.maxPlayers = value
+            tfm.exec.setRoomMaxPlayers(value)
+            displayConfigMenu(target)
+        end,
+        -- password popup
         [104] = function(value, target, commu)
             settings.pw = value
             tfm.exec.setRoomPassword(value)
             displayConfigMenu(target)
         end,
+        -- map popup
         [105] = function(value, target, commu)
             settings.map = value
             tfm.exec.newGame(value)
             displayConfigMenu(target)
-            print(table.tostring(tfm.get.room))
         end,
         title = function(target, commu)
             handleCloseButton(1, target)
@@ -133,7 +146,7 @@ function()
         participants = function(target, commu)
             handleCloseButton(1, target)
             local res = module.translate("fs_participants", commu)
-            for _, name in next, participants do
+            for name in next, participants do
                 res = res .. name .. ", "
             end
             addTextArea(2, res:sub(1, -2), target, 275, 100, 250, 200, true, false)
@@ -153,6 +166,72 @@ function()
         map = function(target, commu)
             handleCloseButton(1, target)
             ui.addPopup(105, 2, module.translate("fs_map_popup", commu), target, nil, nil, nil, true)
+        end,
+        specSpawn = function(target, commu)
+            handleCloseButton(1, target)
+            system.bindMouse(target, true)
+            tfm.exec.chatMessage(module.translate("fs_set_coords", commu), target)
+            players[target].clicks = { specSpawn = true }
+        end,
+        playerSpawn = function(target, commu)
+            handleCloseButton(1, target)
+            system.bindMouse(target, true)
+            tfm.exec.chatMessage(module.translate("fs_set_coords", commu), target)
+            players[target].clicks = { playerSpawn = true }
+        end,
+        outSpawn = function(target, commu)
+            handleCloseButton(1, target)
+            system.bindMouse(target, true)
+            tfm.exec.chatMessage(module.translate("fs_set_coords", commu), target)
+            players[target].clicks = { outSpawn = true }
+        end,
+        showSpecSpawn = function(target, commu)
+            if not settings.specSpawn.x then return end
+            handleCloseButton(1, target)
+            if not closeSequence[1.1] then closeSequence[1.1] = {} end
+            closeSequence[1.1][target] = {
+                images = {
+                    tfm.exec.addImage("16c18dff3ab.png", "&0", settings.specSpawn.x - 5, settings.specSpawn.y - 5, target) -- mouse standing sprite}
+                },
+                txtareas = {
+                    ui_addTextArea(1100, "<b><a href='event:close'>[ Hide ]</a></b>", target, settings.specSpawn.x + 40, settings.specSpawn.y + 10, 100, 20, 0x00ff00, 0x00ff00, 0, false)
+                },
+                onclose = function()
+                    displayConfigMenu(target)
+                end
+            }
+        end,
+        showPlayerSpawn = function(target, commu)
+            if not settings.playerSpawn.x then return end
+            handleCloseButton(1, target)
+            if not closeSequence[1.1] then closeSequence[1.1] = {} end
+            closeSequence[1.1][target] = {
+                images = {
+                    tfm.exec.addImage("16c18dff3ab.png", "&0", settings.playerSpawn.x - 5, settings.playerSpawn.y - 5, target) -- mouse standing sprite}
+                },
+                txtareas = {
+                    ui_addTextArea(1100, "<b><a href='event:close'>[ Hide ]</a></b>", target, settings.playerSpawn.x + 40, settings.playerSpawn.y + 10, 100, 20, 0x00ff00, 0x00ff00, 0, false)
+                },
+                onclose = function()
+                    displayConfigMenu(target)
+                end
+            }
+        end,
+        showOutSpawn = function(target, commu)
+            if not settings.outSpawn.x then return end
+            handleCloseButton(1, target)
+            if not closeSequence[1.1] then closeSequence[1.1] = {} end
+            closeSequence[1.1][target] = {
+                images = {
+                    tfm.exec.addImage("16c18dff3ab.png", "&0", settings.outSpawn.x - 5, settings.outSpawn.y - 5, target) -- mouse standing sprite}
+                },
+                txtareas = {
+                    ui_addTextArea(1100, "<b><a href='event:close'>[ Hide ]</a></b>", target, settings.outSpawn.x + 40, settings.outSpawn.y + 10, 100, 20, 0x00ff00, 0x00ff00, 0, false)
+                },
+                onclose = function()
+                    displayConfigMenu(target)
+                end
+            }
         end
     }
     
@@ -193,6 +272,7 @@ function()
     handleCloseButton = function(id, target, force)
         if not closeSequence[id] then return end
         local sequence = closeSequence[id][target or "*"]
+        if not sequence then return end
         for _, imgid in next, sequence.images do
             tfm.exec.removeImage(imgid)
         end
@@ -202,24 +282,59 @@ function()
         if sequence.onclose and not force then sequence.onclose(target) end
     end
 
+    getMouseSpawnLocation = function(map)
+        local x, y = map:match("<DS X=\"(%d+)\" Y=\"(%d+)\" />")
+        return x, y
+    end
 
-    displayConfigMenu = function(target)
+
+    displayConfigMenu = function(target, updated)
+        if not updated then
+            for admin in next, module.subRoomAdmins do
+                handleCloseButton(1, admin)
+                displayConfigMenu(admin, true)
+            end
+            return
+        end            
         local commu = tfm.get.room.playerList[target].community
+        local defaultX, defaultY = getMouseSpawnLocation(tfm.get.room.xmlMapInfo and tfm.get.room.xmlMapInfo.xml or "")
+        defaultX, defaultY = defaultX or "-", defaultY or "-"
+        local specSpawn, playerSpawn, outSpawn = settings.specSpawn, settings.playerSpawn, settings.outSpawn
         addTextArea(1, module.translate("configmenu", commu, nil, {
             title = settings.title == "" and "[ Set ]" or settings.title,
             desc = settings.desc == "" and "[ Set ]" or settings.desc,
             prize = settings.prize == "" and "[ Set ] " or settings.prize,
-            participants = #participants,
+            participants = participantCount,
             map = settings.map == 0 and "@0" or settings.map,
             pw = settings.pw == "" and "[ Set ]" or settings.pw,
-            maxPlayers = 4,
-            specX = 0, specY = 0,
-            playerX = 0, playerY = 0,
-            outX = 0, outY = 0
-        }), target, 100, 50, 600, 300, true, true)
+            maxPlayers = settings.maxPlayers,
+            specX = specSpawn.x or defaultX, specY = specSpawn.y or defaultY,
+            playerX = playerSpawn.x or defaultX, playerY = playerSpawn.y or defaultY,
+            outX = outSpawn.x or defaultX, outY = outSpawn.y or defaultY
+        }), target, 100, 50, 600, 320, true, true)
+        if module.roomAdmin == target then
+            table.insert(closeSequence[1][target].txtareas, ui_addTextArea(200, module.translate("fs_start", commu), target, 110, 345, 580, 16, nil, 0x324650, 1, true))
+        end
     end
 
-
+    start = function()
+        tfm.exec.chatMessage(module.translate("fs_starting", tfm.get.room.community))
+        started = true
+        tfm.exec.newGame(settings.map)
+        local playerX, playerY, specsX, specsY = settings.playerSpawn.x, settings.playerSpawn.y, settings.specSpawn.x, settings.specSpawn.y
+        for player in next, tfm.get.room.playerList do
+            print(player)
+            if not module.subRoomAdmins[player] then
+                if participants[player] then
+                    tfm.exec.movePlayer(player, playerX, playerY)
+                else
+                    tfm.exec.movePlayer(player, specX, specY)
+                end
+            else
+                handleCloseButton(1, player)
+            end
+        end
+    end
     
     -- [[ events]] --
 
@@ -245,6 +360,27 @@ function()
             omo(0, players[name].clicks.omo, nil, x, y, nil, nil, 40, 2, false)
             players[name].clicks = {}
             system.bindMouse(name, false)
+        elseif players[name].clicks.specSpawn then
+            ui.addTextArea(10, " ", name, x, y, 1, 1, 0x00ff00, 0x00ff00, 0.6, false)
+            settings.specSpawn = {x = x, y = y}
+            players[name].clicks = {}
+            system.bindMouse(name, false)
+            displayConfigMenu(name)
+            Timer.new("checkpoint_remove", function() ui.removeTextArea(10, name) end, 1500, false)
+        elseif players[name].clicks.playerSpawn then
+            ui.addTextArea(10, " ", name, x, y, 1, 1, 0x0000ff, 0x0000ff, 0.6, false)
+            settings.playerSpawn = {x = x, y = y}
+            players[name].clicks = {}
+            system.bindMouse(name, false)
+            displayConfigMenu(name)
+            Timer.new("checkpoint_remove", function() ui.removeTextArea(10, name) end, 1500, false)
+        elseif players[name].clicks.outSpawn then
+            ui.addTextArea(10, " ", name, x, y, 1, 1, 0xff0000, 0xff0000, 0.6, false)
+            settings.outSpawn = {x = x, y = y}
+            players[name].clicks = {}
+            system.bindMouse(name, false)
+            displayConfigMenu(name)
+            Timer.new("checkpoint_remove", function() ui.removeTextArea(10, name) end, 1500, false)
         end
     end
 
@@ -262,6 +398,8 @@ function()
         local commu = tfm.get.room.playerList[name].community
         if evt == "close" then
             handleCloseButton(id / 1000, name)
+        elseif evt == "start" and name == module.roomAdmin then
+            start()
         elseif evt:find("^%w+:.+") then
             local key, value = table.unpack(string.split(evt, ":"))
             if key == "fs" then
@@ -296,6 +434,10 @@ function()
                 displayConfigMenu(admin)
             end
         end
+    end
+
+    eventLoop = function()
+        Timer.process()
     end
 
 end
