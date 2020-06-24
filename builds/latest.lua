@@ -525,8 +525,6 @@ modes.fashion.main = function()
 
     getMouseSpawnLocation = function(map)
         local x, y = map:match("<DS X=\"(%d+)\" Y=\"(%d+)\" />")
-        print(x)
-        print(y)
         return x, y
     end
 
@@ -541,7 +539,6 @@ modes.fashion.main = function()
         end            
         local commu = tfm.get.room.playerList[target].community
         local defaultX, defaultY = getMouseSpawnLocation(tfm.get.room.xmlMapInfo and tfm.get.room.xmlMapInfo.xml or "")
-        print(defaultX)
         defaultX, defaultY = defaultX or "-", defaultY or "-"
         local specSpawn, playerSpawn, outSpawn = settings.specSpawn, settings.playerSpawn, settings.outSpawn
         addTextArea(1, module.translate("configmenu", commu, nil, {
