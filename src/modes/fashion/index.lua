@@ -8,15 +8,21 @@ function()
     tfm.exec.disableAfkDeath()
     tfm.exec.disableAutoNewGame()
     tfm.exec.disableAutoShaman()
+    tfm.exec.disablePhysicalConsumables()
     tfm.exec.newGame(0)
 
     -- [[ game variables ]] --
     local players = {}
     -- copied shamelessly from Utility (https://github.com/imliam/Transformice-Utility/blob/master/utility.lua#L5128)
     local omos = {"omo","@_@","@@","è_é","e_e","#_#",";A;","owo","(Y)(omo)(Y)","©_©","OmO","0m0","°m°","(´°?°`)","~(-_-)~","{^-^}", "uwu", "o3o"}
+    local themes = {
+        [1] = {"Beach/Ocean", "No Fur", "No Customizations", "Nature", "Neon", "Anime", "Cartoons", "Celebrity", "Ice Cream", "Monochrome", "Food", "Animal", "Candy", "Pastel", "Seasons", "Futuristic", "Music", "Television/Movie", "Weather", "Pokemon", "My Little Pony", "Wizard of Oz", "Alice in Wonderland", "Social Media Logo", "Greyscale", "Elements", "Holiday", "Valentines Day", "Christmas", "Halloween", "Easter", "Outer Space", "Gemstones", "Zodiac Signs", "Pirate", "Zombie", "St. Patrick’s Day", "Circus", "Steampunk", "Masked", "Disney", "Goth", "Pastel goth", "Meme", "Jobs", "Cowboy/Western", "Birthday", "LGBTQ+ Pride", "Summer", "Sunset", "Floral", "Marvel", "Scientist", "Toy Story", "Avengers", "Mythical Creatures", "Farmer", "Garden", "Earth Day", "Countries", "Egyptian", "Ancient Rome/Greece", "Detective", "Cookies", "Snowstorm", "Dinosaur", "Alien", "Robot", "Breakfast", "Winter", "Spring", "Autumn", "Birds", "Fishing", "Unicorn", "African Savannah", "Ninja", "Medieval", "Rainbow", "Shaman", "Video game", "Camo/Army", "Star Wars", "Dragon", "Viking", "Aviation", "Back to School", "Hawaiian", "Nerd", "Gamer", "Witches/Wizards", "Vampire", "Tourist", "Fairy", "Mermaid", "Prom", "Frozen", "Bugs", "Elegant/Fancy", "Power Puff Girls", "Scooby Doo", "Harry Potter", "Priest", "Sailor", "Fashion Designer", "50s", "60s", "70s", "80s", "90s", "Victorian Era", "New Years", "Primary Colors", "Sports/Athlete", "Artist", "Pajamas", "Fairytale", "Chocolate", "Greek Mythology", "Hippie", "Aladdin", "Beauty and the Beast", "Fluffy", "Cheerleader", "Chinese New Year", "Hollywood", "Jungle/Rainforest", "League of Legends", "Planets", "Tribal", "Vintage", "Disco", "Camping", "Doctor", "Mickey Mouse Clubhouse", "The Incredibles", "Peter Pan", "Police", "Rapper"},
+        [2] = {"Angels and demons", "Cheese and Fraise", "Black and White", "Opposite", "Hero and Villain", "Wedding", "Fruit and Vegetable", "Disney", "Old and Young", "Cat and Dog", "Cop and Robber", "Queen and King", "Sun and Moon", "Cowboy and Cowgirl", "Predator and Prey", "Witch and Wizard", "Ketchup and Mustard", "Zombie and Survivor", "Popstar and Rockstar"},
+        [3] = {"Alvin and the chipmunks"}
+    }
+
     local closeSequence = {}
     local started = false
-    local round = 0
     local participants = {}
     local participantCount = 0
 
@@ -27,14 +33,29 @@ function()
         maxPlayers = 100,
         pw = "",
         map = 0,
+        consumablesEnabled = false,
         specSpawn = {},
         playerSpawn = {},
         outSpawn = {}
     }
 
+    local round = {
+        id = 1,
+        started = false,
+        theme = "",
+        dur = 0,
+        type = 1
+    }
+    
+    round.types = {
+        INDIVIDUAL  = 1,
+        DUO         = 2,
+        TRIO        = 3
+    }
+    
     -- [[chat commands]] --
     local chatCmds = {
-
+        
         admin = function(name, commu, args)
             if players[args[1]] then
                 if module.subRoomAdmins[name] then
@@ -93,9 +114,9 @@ function()
                 tfm.exec.chatMessage(module.translate("error_auth", commu), name)
             end
         end
-
+        
     }
-
+    
     -- [[ fashion show config functions]] --
     local config = {
         -- title config
@@ -131,6 +152,27 @@ function()
             tfm.exec.newGame(value)
             displayConfigMenu(target)
         end,
+        -- consumables popup
+        [106] = function(value, target, commu)
+            settings.consumablesEnabled = value == "yes"
+            tfm.exec.disablePhysicalConsumables(settings.consumablesEnabled)
+            displayConfigMenu(target)
+        end,
+        -- title popup
+        [107] = function(value, target, commu)
+            round.theme = value
+            round.displayConfigMenu(target)
+        end,
+        -- duration popup
+        [108] = function(value, target, commu)
+            value = tonumber(value)
+            if value then
+                round.dur = value
+            else
+                tfm.exec.chatMessage(module.translate("error_invalid_input", commu), target)
+            end
+            round.displayConfigMenu(target)
+        end,
         title = function(target, commu)
             handleCloseButton(1, target)
             ui.addPopup(100, 2, module.translate("fs_title_popup", commu), target, nil, nil, nil, true)
@@ -145,6 +187,7 @@ function()
         end,
         participants = function(target, commu)
             handleCloseButton(1, target)
+            handleCloseButton(3, target)
             local res = module.translate("fs_participants", commu)
             for name in next, participants do
                 res = res .. name .. ", "
@@ -152,7 +195,13 @@ function()
             addTextArea(2, res:sub(1, -2), target, 275, 100, 250, 200, true, false)
             table.insert(closeSequence[2][target].txtareas, ui_addTextArea(2000, "<p align='center'><a href='event:close'>OK</a></p>", target, 290, 260, 225, 20, nil, 0x324650, 1, true))
             closeSequence[2][target].onclose = function(target)
-                if module.subRoomAdmins[target] then displayConfigMenu(target) end
+                if module.subRoomAdmins[target] then
+                    if not started then
+                        displayConfigMenu(target)
+                    elseif not round.started then
+                        round.displayConfigMenu(target)
+                    end
+                end
             end
         end,
         maxplayers = function(target, commu)
@@ -166,6 +215,20 @@ function()
         map = function(target, commu)
             handleCloseButton(1, target)
             ui.addPopup(105, 2, module.translate("fs_map_popup", commu), target, nil, nil, nil, true)
+        end,
+        consumables = function(target, commu)
+            handleCloseButton(1, target)
+            ui.addPopup(106, 1, module.translate("fs_consumable_popup", commu), target, nil, nil, nil, true)
+        end,
+        theme = function(target, commu)
+            if round.started then return tfm.exec.chatMessage(module.translate("error_gameonprogress", commu), target) end
+            handleCloseButton(3, target)
+            ui.addPopup(107, 2, module.translate("fs_round_title", commu), target, nil, nil, nil, true)
+        end,
+        dur = function(target, commu)
+            if round.started then return tfm.exec.chatMessage(module.translate("error_gameonprogress", commu), target) end
+            handleCloseButton(3, target)
+            ui.addPopup(108, 2, module.translate("fs_round_dur", commu), target, nil, nil, nil, true)
         end,
         specSpawn = function(target, commu)
             handleCloseButton(1, target)
@@ -232,6 +295,21 @@ function()
                     displayConfigMenu(target)
                 end
             }
+        end,
+        individual = function(target, commu)
+            if round.started then return tfm.exec.chatMessage(module.translate("error_gameonprogress", commu), target) end
+            round.type = round.types.INDIVIDUAL
+            round.displayConfigMenu(target)
+        end,
+        duo = function(target, commu)
+            if round.started then return tfm.exec.chatMessage(module.translate("error_gameonprogress", commu), target) end
+            round.type = round.types.DUO
+            round.displayConfigMenu(target)
+        end,
+        trio = function(target, commu)
+            if round.started then return tfm.exec.chatMessage(module.translate("error_gameonprogress", commu), target) end
+            round.type = round.types.TRIO
+            round.displayConfigMenu(target)
         end
     }
     
@@ -268,7 +346,7 @@ function()
             }
         }
     end
-
+    
     handleCloseButton = function(id, target, force)
         if not closeSequence[id] then return end
         local sequence = closeSequence[id][target or "*"]
@@ -286,7 +364,6 @@ function()
         local x, y = map:match("<DS X=\"(%d+)\" Y=\"(%d+)\" />")
         return x, y
     end
-
 
     displayConfigMenu = function(target, updated)
         if not updated then
@@ -308,34 +385,82 @@ function()
             map = settings.map == 0 and "@0" or settings.map,
             pw = settings.pw == "" and "[ Set ]" or settings.pw,
             maxPlayers = settings.maxPlayers,
+            consumables = settings.consumablesEnabled and "Enabled" or "Disabled",
             specX = specSpawn.x or defaultX, specY = specSpawn.y or defaultY,
             playerX = playerSpawn.x or defaultX, playerY = playerSpawn.y or defaultY,
             outX = outSpawn.x or defaultX, outY = outSpawn.y or defaultY
         }), target, 100, 50, 600, 320, true, true)
-        if module.roomAdmin == target then
+        if module.roomAdmin == target and not started then
             table.insert(closeSequence[1][target].txtareas, ui_addTextArea(200, module.translate("fs_start", commu), target, 110, 345, 580, 16, nil, 0x324650, 1, true))
         end
     end
-
+    
     start = function()
-        tfm.exec.chatMessage(module.translate("fs_starting", tfm.get.room.community))
-        started = true
-        tfm.exec.newGame(settings.map)
-        local playerX, playerY, specsX, specsY = settings.playerSpawn.x, settings.playerSpawn.y, settings.specSpawn.x, settings.specSpawn.y
-        for player in next, tfm.get.room.playerList do
-            print(player)
-            if not module.subRoomAdmins[player] then
-                if participants[player] then
-                    tfm.exec.movePlayer(player, playerX, playerY)
+        if not started then
+            tfm.exec.chatMessage(module.translate("fs_starting", tfm.get.room.community))
+            started = true
+            tfm.exec.newGame(settings.map)
+            local playerX, playerY, specsX, specsY = settings.playerSpawn.x, settings.playerSpawn.y, settings.specSpawn.x, settings.specSpawn.y
+            for player in next, tfm.get.room.playerList do
+                if not module.subRoomAdmins[player] then
+                    if participants[player] then
+                        tfm.exec.movePlayer(player, playerX, playerY)
+                    else
+                        tfm.exec.movePlayer(player, specX, specY)
+                    end
                 else
-                    tfm.exec.movePlayer(player, specX, specY)
+                    handleCloseButton(1, player)
+                    round.displayConfigMenu(player)
                 end
-            else
-                handleCloseButton(1, player)
             end
+        elseif started and not round.started then
+            round.start()
         end
     end
     
+    round.start = function()
+        round.started = true
+        tfm.exec.disableMortCommand(false)
+        for admin in next, module.subRoomAdmins do
+            handleCloseButton(3, admin)
+        end
+        round.theme = round.theme == "" and themes[round.type][math.random(#themes[round.type])]
+        tfm.exec.chatMessage(module.translate("fs_newround", tfm.get.room.community, nil, {
+            dur = round.dur == 0 and "Unlimited" or round.dur .. " minutes",
+            theme = round.theme,
+            players = participantCount,
+            round = round.id
+        }))
+    end
+
+    round.stop = function()
+
+    end
+
+    round.displayConfigMenu = function(target, updated)
+        if not updated then
+            for admin in next, module.subRoomAdmins do
+                handleCloseButton(3, admin)
+                round.displayConfigMenu(admin, true)
+            end
+            return
+        end            
+        local commu = tfm.get.room.playerList[target].community
+        addTextArea(3, module.translate("fs_round_config", commu, nil, {
+            round = round.id,
+            theme = round.theme == "" and "Random" or round.theme,
+            dur = round.dur == 0 and "Unlimited" or round.dur,
+            players = participantCount
+        }), target, 100, 50, 600, 320, true, true)
+        closeSequence[3][target].txtareas[4] = ui_addTextArea(3050, (round.type == round.types.INDIVIDUAL and "<D>" or "") .. module.translate("fs_individual_btn", commu), target, 150, 120, 150, 30, nil, 0x324650, 1, true)
+        closeSequence[3][target].txtareas[5] = ui_addTextArea(3051, (round.type == round.types.DUO and "<D>" or "") .. module.translate("fs_duo_btn", commu), target, 320, 120, 150, 30, nil, 0x324650, 1, true)
+        closeSequence[3][target].txtareas[6] = ui_addTextArea(3052, (round.type == round.types.TRIO and "<D>" or "") .. module.translate("fs_trio_btn", commu), target, 490, 120, 150, 30, nil, 0x324650, 1, true)
+        if module.roomAdmin == target and not round.started then
+            closeSequence[3][target].txtareas[7] = ui_addTextArea(3053, module.translate("fs_start", commu), target, 110, 345, 580, 16, nil, 0x324650, 1, true)
+        end
+    end
+
+
     -- [[ events]] --
 
     eventMouse = function(name, x, y)
@@ -398,6 +523,8 @@ function()
         local commu = tfm.get.room.playerList[name].community
         if evt == "close" then
             handleCloseButton(id / 1000, name)
+        elseif evt == "config" and module.subRoomAdmins[name] then
+            if started then round.displayConfigMenu(name) else displayConfigMenu(name) end            
         elseif evt == "start" and name == module.roomAdmin then
             start()
         elseif evt:find("^%w+:.+") then
@@ -432,6 +559,8 @@ function()
         if not started then
             for admin in next, module.subRoomAdmins do
                 displayConfigMenu(admin)
+                tfm.exec.addImage("170f8ccde22.png", ":1", 750, 320) -- cogwheel icon
+                ui.addTextArea(4, "<a href='event:config'>\n\n\n\n</a>", admin, 750, 320, 50, 50, nil, nil, 0, true)
             end
         end
     end

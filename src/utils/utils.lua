@@ -31,9 +31,9 @@ end
 
 table.merge = function(tbl1, tbl2)
     local res = {}
-    for _, tbl in next, ({tbl1, tbl2}) do
+    for _, tbl in ipairs({tbl1, tbl2}) do
         for k, v in next, tbl do
-            res[k] = v
+            res[#res + 1] = v
         end
     end
     return res

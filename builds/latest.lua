@@ -67,9 +67,9 @@ end
 
 table.merge = function(tbl1, tbl2)
     local res = {}
-    for _, tbl in next, ({tbl1, tbl2}) do
+    for _, tbl in ipairs({tbl1, tbl2}) do
         for k, v in next, tbl do
-            res[k] = v
+            res[#res + 1] = v
         end
     end
     return res
@@ -86,6 +86,8 @@ translations.en = {
     modeinfo = "<p align='center'><D><font size='16' face='Lucida console'>#castle0${name}</font></D></p><br><i><font color='#ffffff' size='14'>“<br>${description}<br><p align='right'>”</p></font></i><b>Author: </b> ${author}<br><b>Version: </b> ${version}</font><br><br><p align='center'><b><a href='event:play:${name}'><T>( Play )</T></a></b></p><br><br><a href='event:modes'>« Back</a>",
     new_roomadmin = "<N>[</N><D>•</D><N>] </N><D>${name}</D> <N>is now a room admin!</N>",
     error_adminexists = "<N>[</N><R>•</R><N>] <R>Error: ${name} is already an admin</R>",
+    error_gameonprogress = "<N>[</N><R>•</R><N>] <R>Error: Game in progress!</R>",
+    error_invalid_input = "<N>[</N><R>•</R><N>] <R>Error: Invlid input!</R>",
     admins = "<N>[</N><D>•</D><N>] </N><D>Admins: </D>",
     error_auth = "<N>[</N><R>•</R><N>] <R>Error: Authorisation</R>",
     welcome0graphs = "<br><N><p align='center'>Welcoem to <b><D>#castle0graphs</D></b><br>Report any bugs or suggest interesting functions to <b><O>King_seniru</O><G><font size='8'>#5890</font></G></b><br><br>Type <b><BV>!commands</BV></b> to check out the available commands</p></N><br>",
@@ -94,12 +96,13 @@ translations.en = {
         "<b>Title</b>: <a href='event:fs:title'>${title}</a><br>" ..
         "<b>Description</b>: <a href='event:fs:desc'>${desc}</a><br>" ..
         "<b>Prize</b>: <a href='event:fs:prize'>${prize}<br><br></a>" ..
-        "<b>Participants</b>: ${participants}<a href='event:fs:participants'> (See all)</a><br><br><p align='center'>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br>" ..
+        "<b>Participants</b>: ${participants}<a href='event:fs:participants'> (See all)</a><br><p align='center'><G>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</G><br>" ..
         "<b><font size='13'><D>Room settings</D></font></b></p>" ..
         "<b>Map</b>: <a href='event:fs:map'>${map}</a><br>" ..
         "<b>Password</b>: <a href='event:fs:password'>${pw}</a><br>" ..
         "<b>Max participants</b>: <a href='event:fs:maxplayers'>${maxPlayers}</a><br>" ..
-        "<br><b><font size='13'>Mouse spawn locations</font></b><br><br>" ..
+        "<b>Consumables</b>: <a href='event:fs:consumables'>${consumables}</a><br>" ..
+        "<br><b><D>Mouse spawn locations</D></b><br>" ..
         "<b>Spectator spawn</b>: <a href='event:fs:specSpawn'> X: ${specX}, Y: ${specY}</a>\t\t<a href='event:fs:showSpecSpawn'>[ Show ]</a><br>" ..
         "<b>Participant spawn</b>: <a href='event:fs:playerSpawn'> X: ${playerX}, Y: ${playerY}</a>\t\t<a href='event:fs:showPlayerSpawn'>[ Show ]</a><br>" ..
         "<b>Player (out) spawn</b>: <a href='event:fs:outSpawn'> X: ${outX}, Y: ${outY}\t\t<a href='event:fs:showOutSpawn'>[ Show ]</a><br>",
@@ -110,9 +113,20 @@ translations.en = {
     fs_pw_popup = "Please enter the password, leave it blank to unset it <i>(alias command: !pw)</i>",
     fs_participants = "<p align='center'><b><D>Participants</D></b></p><br>",
     fs_map_popup = "Please enter the map code!",
+    fs_consumable_popup = "Do you need to enable consumables?",
     fs_set_coords = "<N>[</N><D>•</D><N>] Please click on the map to set coordinates</N>",
     fs_start = "<p align='center'><a href='event:start'><b>Start</b></a></p>",
-    fs_starting = "<N>[</N><D>•</D><N>]</N> <D>Starting the fashion show!</D>"
+    fs_starting = "<N>[</N><D>•</D><N>]</N> <b><D>Starting the fashion show!</D></b>",
+    fs_round_config = "<p align='center'><font size='20' color='#ffcc00'><b>Config menu - round ${round}</b></font></p><br>" ..
+        "<br><br><br><br><br><br><b>Theme</b>: <a href='event:fs:theme'>${theme}</a><br>" ..
+        "<b>Duration</b>: <a href='event:fs:dur'>${dur}</a><br><br>" ..
+        "<b>Players</b>: ${players} <a href='event:fs:participants'> (See all)</a>",
+    fs_round_title = "Please enter the title for the round!",
+    fs_round_dur = "Please specify the duration of the round in minutes <i>(eg: 2)</i><br>Enter 0 to set it unlimited</i>",
+    fs_individual_btn = "<p align='center'><a href='event:fs:individual'><b>Individual</b></a></p>",
+    fs_duo_btn = "<p align='center'><a href='event:fs:duo'><b>Duo</b></a></p>",
+    fs_trio_btn = "<p align='center'><a href='event:fs:trio'><b>Trio</b></a></p>",
+    fs_newround = "<N>[</N><D>•</D><N>] <b><D>Round ${round} started!</D></b><br>\t<FC>• Theme:</FC> <N>${theme}</N><br>\t<FC>• Duration:</FC> <N>${dur}</N><br>\t<FC>• Players left:</FC> <N>${players}</N>"
 }
 
 
@@ -249,15 +263,21 @@ modes.fashion.main = function()
     tfm.exec.disableAfkDeath()
     tfm.exec.disableAutoNewGame()
     tfm.exec.disableAutoShaman()
+    tfm.exec.disablePhysicalConsumables()
     tfm.exec.newGame(0)
 
     -- [[ game variables ]] --
     local players = {}
     -- copied shamelessly from Utility (https://github.com/imliam/Transformice-Utility/blob/master/utility.lua#L5128)
     local omos = {"omo","@_@","@@","è_é","e_e","#_#",";A;","owo","(Y)(omo)(Y)","©_©","OmO","0m0","°m°","(´°?°`)","~(-_-)~","{^-^}", "uwu", "o3o"}
+    local themes = {
+        [1] = {"Beach/Ocean", "No Fur", "No Customizations", "Nature", "Neon", "Anime", "Cartoons", "Celebrity", "Ice Cream", "Monochrome", "Food", "Animal", "Candy", "Pastel", "Seasons", "Futuristic", "Music", "Television/Movie", "Weather", "Pokemon", "My Little Pony", "Wizard of Oz", "Alice in Wonderland", "Social Media Logo", "Greyscale", "Elements", "Holiday", "Valentines Day", "Christmas", "Halloween", "Easter", "Outer Space", "Gemstones", "Zodiac Signs", "Pirate", "Zombie", "St. Patrick’s Day", "Circus", "Steampunk", "Masked", "Disney", "Goth", "Pastel goth", "Meme", "Jobs", "Cowboy/Western", "Birthday", "LGBTQ+ Pride", "Summer", "Sunset", "Floral", "Marvel", "Scientist", "Toy Story", "Avengers", "Mythical Creatures", "Farmer", "Garden", "Earth Day", "Countries", "Egyptian", "Ancient Rome/Greece", "Detective", "Cookies", "Snowstorm", "Dinosaur", "Alien", "Robot", "Breakfast", "Winter", "Spring", "Autumn", "Birds", "Fishing", "Unicorn", "African Savannah", "Ninja", "Medieval", "Rainbow", "Shaman", "Video game", "Camo/Army", "Star Wars", "Dragon", "Viking", "Aviation", "Back to School", "Hawaiian", "Nerd", "Gamer", "Witches/Wizards", "Vampire", "Tourist", "Fairy", "Mermaid", "Prom", "Frozen", "Bugs", "Elegant/Fancy", "Power Puff Girls", "Scooby Doo", "Harry Potter", "Priest", "Sailor", "Fashion Designer", "50s", "60s", "70s", "80s", "90s", "Victorian Era", "New Years", "Primary Colors", "Sports/Athlete", "Artist", "Pajamas", "Fairytale", "Chocolate", "Greek Mythology", "Hippie", "Aladdin", "Beauty and the Beast", "Fluffy", "Cheerleader", "Chinese New Year", "Hollywood", "Jungle/Rainforest", "League of Legends", "Planets", "Tribal", "Vintage", "Disco", "Camping", "Doctor", "Mickey Mouse Clubhouse", "The Incredibles", "Peter Pan", "Police", "Rapper"},
+        [2] = {"Angels and demons", "Cheese and Fraise", "Black and White", "Opposite", "Hero and Villain", "Wedding", "Fruit and Vegetable", "Disney", "Old and Young", "Cat and Dog", "Cop and Robber", "Queen and King", "Sun and Moon", "Cowboy and Cowgirl", "Predator and Prey", "Witch and Wizard", "Ketchup and Mustard", "Zombie and Survivor", "Popstar and Rockstar"},
+        [3] = {"Alvin and the chipmunks"}
+    }
+
     local closeSequence = {}
     local started = false
-    local round = 0
     local participants = {}
     local participantCount = 0
 
@@ -268,14 +288,29 @@ modes.fashion.main = function()
         maxPlayers = 100,
         pw = "",
         map = 0,
+        consumablesEnabled = false,
         specSpawn = {},
         playerSpawn = {},
         outSpawn = {}
     }
 
+    local round = {
+        id = 1,
+        started = false,
+        theme = "",
+        dur = 0,
+        type = 1
+    }
+    
+    round.types = {
+        INDIVIDUAL  = 1,
+        DUO         = 2,
+        TRIO        = 3
+    }
+    
     -- [[chat commands]] --
     local chatCmds = {
-
+        
         admin = function(name, commu, args)
             if players[args[1]] then
                 if module.subRoomAdmins[name] then
@@ -334,9 +369,9 @@ modes.fashion.main = function()
                 tfm.exec.chatMessage(module.translate("error_auth", commu), name)
             end
         end
-
+        
     }
-
+    
     -- [[ fashion show config functions]] --
     local config = {
         -- title config
@@ -372,6 +407,27 @@ modes.fashion.main = function()
             tfm.exec.newGame(value)
             displayConfigMenu(target)
         end,
+        -- consumables popup
+        [106] = function(value, target, commu)
+            settings.consumablesEnabled = value == "yes"
+            tfm.exec.disablePhysicalConsumables(settings.consumablesEnabled)
+            displayConfigMenu(target)
+        end,
+        -- title popup
+        [107] = function(value, target, commu)
+            round.theme = value
+            round.displayConfigMenu(target)
+        end,
+        -- duration popup
+        [108] = function(value, target, commu)
+            value = tonumber(value)
+            if value then
+                round.dur = value
+            else
+                tfm.exec.chatMessage(module.translate("error_invalid_input", commu), target)
+            end
+            round.displayConfigMenu(target)
+        end,
         title = function(target, commu)
             handleCloseButton(1, target)
             ui.addPopup(100, 2, module.translate("fs_title_popup", commu), target, nil, nil, nil, true)
@@ -386,6 +442,7 @@ modes.fashion.main = function()
         end,
         participants = function(target, commu)
             handleCloseButton(1, target)
+            handleCloseButton(3, target)
             local res = module.translate("fs_participants", commu)
             for name in next, participants do
                 res = res .. name .. ", "
@@ -393,7 +450,13 @@ modes.fashion.main = function()
             addTextArea(2, res:sub(1, -2), target, 275, 100, 250, 200, true, false)
             table.insert(closeSequence[2][target].txtareas, ui_addTextArea(2000, "<p align='center'><a href='event:close'>OK</a></p>", target, 290, 260, 225, 20, nil, 0x324650, 1, true))
             closeSequence[2][target].onclose = function(target)
-                if module.subRoomAdmins[target] then displayConfigMenu(target) end
+                if module.subRoomAdmins[target] then
+                    if not started then
+                        displayConfigMenu(target)
+                    elseif not round.started then
+                        round.displayConfigMenu(target)
+                    end
+                end
             end
         end,
         maxplayers = function(target, commu)
@@ -407,6 +470,20 @@ modes.fashion.main = function()
         map = function(target, commu)
             handleCloseButton(1, target)
             ui.addPopup(105, 2, module.translate("fs_map_popup", commu), target, nil, nil, nil, true)
+        end,
+        consumables = function(target, commu)
+            handleCloseButton(1, target)
+            ui.addPopup(106, 1, module.translate("fs_consumable_popup", commu), target, nil, nil, nil, true)
+        end,
+        theme = function(target, commu)
+            if round.started then return tfm.exec.chatMessage(module.translate("error_gameonprogress", commu), target) end
+            handleCloseButton(3, target)
+            ui.addPopup(107, 2, module.translate("fs_round_title", commu), target, nil, nil, nil, true)
+        end,
+        dur = function(target, commu)
+            if round.started then return tfm.exec.chatMessage(module.translate("error_gameonprogress", commu), target) end
+            handleCloseButton(3, target)
+            ui.addPopup(108, 2, module.translate("fs_round_dur", commu), target, nil, nil, nil, true)
         end,
         specSpawn = function(target, commu)
             handleCloseButton(1, target)
@@ -473,6 +550,21 @@ modes.fashion.main = function()
                     displayConfigMenu(target)
                 end
             }
+        end,
+        individual = function(target, commu)
+            if round.started then return tfm.exec.chatMessage(module.translate("error_gameonprogress", commu), target) end
+            round.type = round.types.INDIVIDUAL
+            round.displayConfigMenu(target)
+        end,
+        duo = function(target, commu)
+            if round.started then return tfm.exec.chatMessage(module.translate("error_gameonprogress", commu), target) end
+            round.type = round.types.DUO
+            round.displayConfigMenu(target)
+        end,
+        trio = function(target, commu)
+            if round.started then return tfm.exec.chatMessage(module.translate("error_gameonprogress", commu), target) end
+            round.type = round.types.TRIO
+            round.displayConfigMenu(target)
         end
     }
     
@@ -509,7 +601,7 @@ modes.fashion.main = function()
             }
         }
     end
-
+    
     handleCloseButton = function(id, target, force)
         if not closeSequence[id] then return end
         local sequence = closeSequence[id][target or "*"]
@@ -527,7 +619,6 @@ modes.fashion.main = function()
         local x, y = map:match("<DS X=\"(%d+)\" Y=\"(%d+)\" />")
         return x, y
     end
-
 
     displayConfigMenu = function(target, updated)
         if not updated then
@@ -549,34 +640,82 @@ modes.fashion.main = function()
             map = settings.map == 0 and "@0" or settings.map,
             pw = settings.pw == "" and "[ Set ]" or settings.pw,
             maxPlayers = settings.maxPlayers,
+            consumables = settings.consumablesEnabled and "Enabled" or "Disabled",
             specX = specSpawn.x or defaultX, specY = specSpawn.y or defaultY,
             playerX = playerSpawn.x or defaultX, playerY = playerSpawn.y or defaultY,
             outX = outSpawn.x or defaultX, outY = outSpawn.y or defaultY
         }), target, 100, 50, 600, 320, true, true)
-        if module.roomAdmin == target then
+        if module.roomAdmin == target and not started then
             table.insert(closeSequence[1][target].txtareas, ui_addTextArea(200, module.translate("fs_start", commu), target, 110, 345, 580, 16, nil, 0x324650, 1, true))
         end
     end
-
+    
     start = function()
-        tfm.exec.chatMessage(module.translate("fs_starting", tfm.get.room.community))
-        started = true
-        tfm.exec.newGame(settings.map)
-        local playerX, playerY, specsX, specsY = settings.playerSpawn.x, settings.playerSpawn.y, settings.specSpawn.x, settings.specSpawn.y
-        for player in next, tfm.get.room.playerList do
-            print(player)
-            if not module.subRoomAdmins[player] then
-                if participants[player] then
-                    tfm.exec.movePlayer(player, playerX, playerY)
+        if not started then
+            tfm.exec.chatMessage(module.translate("fs_starting", tfm.get.room.community))
+            started = true
+            tfm.exec.newGame(settings.map)
+            local playerX, playerY, specsX, specsY = settings.playerSpawn.x, settings.playerSpawn.y, settings.specSpawn.x, settings.specSpawn.y
+            for player in next, tfm.get.room.playerList do
+                if not module.subRoomAdmins[player] then
+                    if participants[player] then
+                        tfm.exec.movePlayer(player, playerX, playerY)
+                    else
+                        tfm.exec.movePlayer(player, specX, specY)
+                    end
                 else
-                    tfm.exec.movePlayer(player, specX, specY)
+                    handleCloseButton(1, player)
+                    round.displayConfigMenu(player)
                 end
-            else
-                handleCloseButton(1, player)
             end
+        elseif started and not round.started then
+            round.start()
         end
     end
     
+    round.start = function()
+        round.started = true
+        tfm.exec.disableMortCommand(false)
+        for admin in next, module.subRoomAdmins do
+            handleCloseButton(3, admin)
+        end
+        round.theme = round.theme == "" and themes[round.type][math.random(#themes[round.type])]
+        tfm.exec.chatMessage(module.translate("fs_newround", tfm.get.room.community, nil, {
+            dur = round.dur == 0 and "Unlimited" or round.dur .. " minutes",
+            theme = round.theme,
+            players = participantCount,
+            round = round.id
+        }))
+    end
+
+    round.stop = function()
+
+    end
+
+    round.displayConfigMenu = function(target, updated)
+        if not updated then
+            for admin in next, module.subRoomAdmins do
+                handleCloseButton(3, admin)
+                round.displayConfigMenu(admin, true)
+            end
+            return
+        end            
+        local commu = tfm.get.room.playerList[target].community
+        addTextArea(3, module.translate("fs_round_config", commu, nil, {
+            round = round.id,
+            theme = round.theme == "" and "Random" or round.theme,
+            dur = round.dur == 0 and "Unlimited" or round.dur,
+            players = participantCount
+        }), target, 100, 50, 600, 320, true, true)
+        closeSequence[3][target].txtareas[4] = ui_addTextArea(3050, (round.type == round.types.INDIVIDUAL and "<D>" or "") .. module.translate("fs_individual_btn", commu), target, 150, 120, 150, 30, nil, 0x324650, 1, true)
+        closeSequence[3][target].txtareas[5] = ui_addTextArea(3051, (round.type == round.types.DUO and "<D>" or "") .. module.translate("fs_duo_btn", commu), target, 320, 120, 150, 30, nil, 0x324650, 1, true)
+        closeSequence[3][target].txtareas[6] = ui_addTextArea(3052, (round.type == round.types.TRIO and "<D>" or "") .. module.translate("fs_trio_btn", commu), target, 490, 120, 150, 30, nil, 0x324650, 1, true)
+        if module.roomAdmin == target and not round.started then
+            closeSequence[3][target].txtareas[7] = ui_addTextArea(3053, module.translate("fs_start", commu), target, 110, 345, 580, 16, nil, 0x324650, 1, true)
+        end
+    end
+
+
     -- [[ events]] --
 
     eventMouse = function(name, x, y)
@@ -639,6 +778,8 @@ modes.fashion.main = function()
         local commu = tfm.get.room.playerList[name].community
         if evt == "close" then
             handleCloseButton(id / 1000, name)
+        elseif evt == "config" and module.subRoomAdmins[name] then
+            if started then round.displayConfigMenu(name) else displayConfigMenu(name) end            
         elseif evt == "start" and name == module.roomAdmin then
             start()
         elseif evt:find("^%w+:.+") then
@@ -673,6 +814,8 @@ modes.fashion.main = function()
         if not started then
             for admin in next, module.subRoomAdmins do
                 displayConfigMenu(admin)
+                tfm.exec.addImage("170f8ccde22.png", ":1", 750, 320) -- cogwheel icon
+                ui.addTextArea(4, "<a href='event:config'>\n\n\n\n</a>", admin, 750, 320, 50, 50, nil, nil, 0, true)
             end
         end
     end
