@@ -7,8 +7,8 @@ translations.en = {
     error_adminexists = "<N>[</N><R>•</R><N>] <R>Error: ${name} is already an admin</R>",
     error_gameonprogress = "<N>[</N><R>•</R><N>] <R>Error: Game in progress!</R>",
     error_invalid_input = "<N>[</N><R>•</R><N>] <R>Error: Invlid input!</R>",
-    admins = "<N>[</N><D>•</D><N>] </N><D>Admins: </D>",
     error_auth = "<N>[</N><R>•</R><N>] <R>Error: Authorisation</R>",
+    admins = "<N>[</N><D>•</D><N>] </N><D>Admins: </D>",
     welcome0graphs = "<br><N><p align='center'>Welcoem to <b><D>#castle0graphs</D></b><br>Report any bugs or suggest interesting functions to <b><O>King_seniru</O><G><font size='8'>#5890</font></G></b><br><br>Type <b><BV>!commands</BV></b> to check out the available commands</p></N><br>",
     cmds0graphs = "<BV>!admin <name></BV> - Makes a player admin <R><i>(admin only command)</i></R>",
     configmenu = "<p align='center'><font size='20' color='#ffcc00'><b>Config menu</b></font></p><br>" ..
@@ -42,8 +42,12 @@ translations.en = {
         "<b>Players</b>: ${players} <a href='event:fs:participants'> (See all)</a>",
     fs_round_title = "Please enter the title for the round!",
     fs_round_dur = "Please specify the duration of the round in minutes <i>(eg: 2)</i><br>Enter 0 to set it unlimited</i>",
-    fs_individual_btn = "<p align='center'><a href='event:fs:individual'><b>Individual</b></a></p>",
+    fs_solo_btn = "<p align='center'><a href='event:fs:solo'><b>Solo</b></a></p>",
     fs_duo_btn = "<p align='center'><a href='event:fs:duo'><b>Duo</b></a></p>",
     fs_trio_btn = "<p align='center'><a href='event:fs:trio'><b>Trio</b></a></p>",
-    fs_newround = "<N>[</N><D>•</D><N>] <b><D>Round ${round} started!</D></b><br>\t<FC>• Theme:</FC> <N>${theme}</N><br>\t<FC>• Duration:</FC> <N>${dur}</N><br>\t<FC>• Players left:</FC> <N>${players}</N>"
+    fs_newround = "<N>[</N><D>•</D><N>] <b><D>Round ${round} started!</D></b><br>\t<FC>• Theme:</FC> <N>${theme} (${type})</N><br>\t<FC>• Duration:</FC> <N>${dur}</N><br>\t<FC>• Players left:</FC> <N>${players}</N>",
+    fs_round_end = "<N>[</N><D>•</D><N>] Round <D>${round}</D> ended! Judging in progress...</N>",
+    fs_maxplayers_error = "<N>[</N><R>•</R><N>] Sorry, the fashion show already got enough participants :(",
+    fs_elimination_confirm = "Eliminate ${name}?",
+    fs_error_not_playing = "<R>The selected player is not a participant!"
 }
