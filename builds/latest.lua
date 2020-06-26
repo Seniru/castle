@@ -484,7 +484,6 @@ modes.fashion.main = function()
         end,
         -- elimination popup
         [150] = function(value, target, commu)
-            print(value)
             if value == "yes" then
                 local out = players[target].selectedPlayer
                 if participants[out] then
