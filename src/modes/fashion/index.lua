@@ -30,8 +30,10 @@ function()
 
     local closeSequence = {}
     local started = false
+    local over = false
     local participants = {}
     local participantCount = 0
+    local leftPlayers = {}
 
     local settings = {
         title = "",
@@ -144,7 +146,7 @@ function()
                     participants[name] = true
                     participantCount = participantCount + 1
                     tfm.exec.movePlayer(name, settings.playerSpawn.x, settings.playerSpawn.y)
-                    tfm.exec.setNameColor(name, 0x0000ff)
+                    tfm.exec.setNameColor(name, 0x00E5EE)
                 end
             end
         end,
@@ -163,8 +165,20 @@ function()
             if round.started and module.subRoomAdmins[name] then
                 round.stop()
             end
-        end
-        
+        end,
+
+        eliminate = function(name, commu, args)
+            local commu = tfm.get.room.playerList[name].community
+            if not module.subRoomAdmins[name] then return tfm.exec.chatMessage(module.translate("error_auth"), commu) end
+            players[name].selectedPlayer = args[1]
+            if args[1] and participants[args[1]] then
+                eliminatePlayer(args[1])
+            end
+        end,
+
+        help = function(name, commu, args)
+            addTextArea(7, module.translate("fs_help", commu, type(args) == "table" and "main" or args), name, 100, 50, 600, 320, true, true)
+        end        
     }
     
     -- [[ fashion show config functions]] --
@@ -186,8 +200,10 @@ function()
         end,
         -- max participants config
         [103] = function(value, target, commu)
-            settings.maxPlayers = value
-            tfm.exec.setRoomMaxPlayers(value)
+            local max = tonumber(value)
+            if not max then return tfm.exec.chatMessage(module.translate("error_invalid_input", commu), target) end
+            settings.maxPlayers = max
+            tfm.exec.setRoomMaxPlayers(max)
             displayConfigMenu(target)
         end,
         -- password popup
@@ -198,8 +214,10 @@ function()
         end,
         -- map popup
         [105] = function(value, target, commu)
-            settings.map = value
-            tfm.exec.newGame(value)
+            local map = value:match("^@?(%d+)$")
+            if not map then return tfm.exec.chatMessage(module.translate("error_invalid_input", ommu), target) end
+            settings.map = map
+            tfm.exec.newGame(map)
             displayConfigMenu(target)
         end,
         -- consumables popup
@@ -216,39 +234,29 @@ function()
         -- duration popup
         [108] = function(value, target, commu)
             value = tonumber(value)
-            if value then
-                round.dur = value
-            else
-                tfm.exec.chatMessage(module.translate("error_invalid_input", commu), target)
-            end
+            if not value then return tfm.exec.chatMessage(module.translate("error_invalid_input", commu), target) end
+            round.dur = value
+            tfm.exec.chatMessage(module.translate("error_invalid_input", commu), target)
             round.displayConfigMenu(target)
         end,
         -- elimination popup
         [150] = function(value, target, commu)
             if value == "yes" then
                 local out = players[target].selectedPlayer
-                if participants[out] then
-                    tfm.exec.setNameColor(out, 0xff0000)
-                    tfm.exec.movePlayer(out, settings.outSpawn.x, settings.outSpawn.y)
-                    onkey[keys.E](out, true, settings.outSpawn.x, settings.outSpawn.y)
-                    participants[out] = nil
-                    participantCount = participantCount - 1
-                else
-                    tfm.exec.chatMessage(module.translate("fs_error_not_playing", commu), target)
-                end
+                eliminatePlayer(out)
             end
         end,
         title = function(target, commu)
             handleCloseButton(1, target)
-            ui.addPopup(100, 2, module.translate("fs_title_popup", commu), target, nil, nil, nil, true)
+            ui.addPopup(100, 2, module.translate("fs_title_popup", commu), target, 250, 40, 300, true)
         end,
         desc = function(target, commu)
             handleCloseButton(1, target)
-            ui.addPopup(101, 2, module.translate("fs_desc_popup", commu), target, nil, nil, nil, true)
+            ui.addPopup(101, 2, module.translate("fs_desc_popup", commu), target, 250, 40, 300, true)
         end,
         prize = function(target, commu)
             handleCloseButton(1, target)
-            ui.addPopup(102, 2, module.translate("fs_prize_popup", commu), target, nil, nil, nil, true)
+            ui.addPopup(102, 2, module.translate("fs_prize_popup", commu), target, 250, 40, 300, true)
         end,
         participants = function(target, commu)
             handleCloseButton(1, target)
@@ -271,29 +279,29 @@ function()
         end,
         maxplayers = function(target, commu)
             handleCloseButton(1, target)
-            ui.addPopup(103, 2, module.translate("fs_maxp_popup", commu), target, nil, nil, nil, true)
+            ui.addPopup(103, 2, module.translate("fs_maxp_popup", commu), target, 250, 40, 300, true)
         end,
         password = function(target, commu)
             handleCloseButton(1, target)
-            ui.addPopup(104, 2, module.translate("fs_pw_popup", commu), target, nil, nil, nil, true)
+            ui.addPopup(104, 2, module.translate("fs_pw_popup", commu), target, 250, 40, 300, true)
         end,
         map = function(target, commu)
             handleCloseButton(1, target)
-            ui.addPopup(105, 2, module.translate("fs_map_popup", commu), target, nil, nil, nil, true)
+            ui.addPopup(105, 2, module.translate("fs_map_popup", commu), target, 250, 40, 300, true)
         end,
         consumables = function(target, commu)
             handleCloseButton(1, target)
-            ui.addPopup(106, 1, module.translate("fs_consumable_popup", commu), target, nil, nil, nil, true)
+            ui.addPopup(106, 1, module.translate("fs_consumable_popup", commu), target, 250, 40, 300, true)
         end,
         theme = function(target, commu)
             if round.started then return tfm.exec.chatMessage(module.translate("error_gameonprogress", commu), target) end
             handleCloseButton(3, target)
-            ui.addPopup(107, 2, module.translate("fs_round_title", commu), target, nil, nil, nil, true)
+            ui.addPopup(107, 2, module.translate("fs_round_title", commu), target, 250, 40, 300, true)
         end,
         dur = function(target, commu)
             if round.started then return tfm.exec.chatMessage(module.translate("error_gameonprogress", commu), target) end
             handleCloseButton(3, target)
-            ui.addPopup(108, 2, module.translate("fs_round_dur", commu), target, nil, nil, nil, true)
+            ui.addPopup(108, 2, module.translate("fs_round_dur", commu), target, 250, 40, 300, true)
         end,
         specSpawn = function(target, commu)
             handleCloseButton(1, target)
@@ -413,7 +421,7 @@ function()
     end
     
     handleCloseButton = function(id, target, force)
-        if not closeSequence[id] then return end
+        if (not closeSequence[id]) or (not tfm.get.room.playerList[target]) then return end
         local sequence = closeSequence[id][target or "*"]
         if not sequence then return end
         for _, imgid in next, sequence.images do
@@ -441,6 +449,7 @@ function()
     end
 
     displayConfigMenu = function(target, updated)
+        if not tfm.get.room.playerList[target] then return end
         if not updated then
             for admin in next, module.subRoomAdmins do
                 handleCloseButton(1, admin)
@@ -472,6 +481,8 @@ function()
     
     start = function()
         if not started then
+            local commu = tfm.get.room.playerList[module.roomAdmin] and tfm.get.room.playerList[module.roomAdmin].community or "en"
+            if participantCount < 3 then return tfm.exec.chatMessage(module.translate("fs_players_not_enough", commu), module.roomAdmin) end
             tfm.exec.chatMessage(module.translate("fs_starting", tfm.get.room.community))
             started = true
             tfm.exec.newGame(settings.map)
@@ -490,6 +501,29 @@ function()
             end
         elseif started and not round.started then
             round.start()
+        end
+    end
+
+    eliminatePlayer = function(out)
+        if participants[out] then
+            tfm.exec.setNameColor(out, 0xff0000)
+            tfm.exec.movePlayer(out, settings.outSpawn.x, settings.outSpawn.y)
+            onkey[keys.E](out, true, settings.outSpawn.x, settings.outSpawn.y)
+            participants[out] = nil
+            participantCount = participantCount - 1
+            tfm.exec.chatMessage(module.translate("fs_eliminated", tfm.get.room.community, nil, {player = out}))
+            if participantCount == 1 then
+                local winner = next(participants)
+                tfm.exec.chatMessage(module.translate("fs_winner",  tfm.get.room.community, nil, {winner = winner}))
+                over = true
+                for player in next, tfm.get.room.playerList do
+                    system.bindMouse(player, false)
+                end
+                ui.removeTextArea(4)
+                ui.removeTextArea(6)
+            end
+        else
+            tfm.exec.chatMessage(module.translate("fs_error_not_playing", commu), target)
         end
     end
     
@@ -518,6 +552,7 @@ function()
             print("Creating the timer")
             timer = Timer("round_timer", round.stop, 1000 * 60 * round.dur, false)    
         end
+        round.id = round.id + 1
     end
 
     round.stop = function()
@@ -527,13 +562,21 @@ function()
         end
         tfm.exec.disableMortCommand()
         for admin in next, module.subRoomAdmins do
+            local commu = tfm.get.room.playerList[admin].community
             system.bindMouse(admin, true)
             system.bindKeyboard(admin, keys.SHIFT, true, true)
             system.bindKeyboard(admin, keys.SHIFT, false, true)
+            ui.addTextArea(6, module.translate("fs_elimination_end", admin), admin, 650, 330, 80, 20, nil, 0x00ff00, 0.6, true)
+        end
+        for left in next, leftPlayers do
+            participantCount = participantCount - 1
+            participants[left] = nil
         end
     end
 
     round.displayConfigMenu = function(target, updated)
+        if not tfm.get.room.playerList[target] then return end
+        ui.removeTextArea(6)
         if not updated then
             for admin in next, module.subRoomAdmins do
                 handleCloseButton(3, admin)
@@ -560,6 +603,7 @@ function()
     -- [[ events]] --
 
     eventMouse = function(name, x, y)
+        if over then return end
         local commu = tfm.get.room.playerList[name].community
         if players[name].clicks.tp then
             local tpType = players[name].clicks.tp
@@ -613,6 +657,7 @@ function()
     end
 
     eventKeyboard = function(name, key, down, x, y)
+        if over then return end
         if onkey[key] then
             onkey[key](name, down, x, y)
         end
@@ -629,6 +674,7 @@ function()
     end
 
     eventTextAreaCallback =  function(id, name, evt)
+        if over then return end
         local commu = tfm.get.room.playerList[name].community
         if evt == "close" then
             handleCloseButton(id / 1000, name)
@@ -636,18 +682,30 @@ function()
             if started then round.displayConfigMenu(name) else displayConfigMenu(name) end            
         elseif evt == "start" and name == module.roomAdmin then
             start()
+        elseif evt == "newround" and module.subRoomAdmins[name] then
+            tfm.exec.chatMessage(module.translate("fs_newroundprior", tfm.get.room.community))
+            round.started = false
+            round.theme = ""
+            round.dur = 0
+            round.type = round.types.SOLO
+            ui.removeTextArea(6)
+            round.displayConfigMenu(name)
         elseif evt:find("^%w+:.+") then
             local key, value = table.unpack(string.split(evt, ":"))
             if key == "fs" then
                 if module.subRoomAdmins[name] and config[value] then
                     config[value](name, commu)
                 end
+            elseif key == "help" then
+                chatCmds["help"](name, commu, value)
             end
         end
     end
 
     eventPopupAnswer = function(id, name, answer)
+        if over then return end
         local commu = tfm.get.room.playerList[name].community
+        if answer:match("https?") or answer:match("</?%w+>") then return tfm.exec.chatMessage(module.translate("error_invalid_input", commu), name) end
         if id >= 100 and id < 200 and module.subRoomAdmins[name] and config[id] then-- admin config stuff
             config[id](answer, name, commu)
         end
@@ -668,17 +726,21 @@ function()
     eventNewPlayer = function(name)
         players[name] = {clicks = {}, activeKeys = {}}
         system.bindKeyboard(name, keys.E, true, true)
+        eventPlayerDied(name)
+        tfm.exec.chatMessage(module.translate("fs_welcome", tfm.get.room.playerList[name].community), name)
     end
 
     eventPlayerLeft = function(name)
-        players[name] = nil
+        if participants[name] then
+            leftPlayers[name] = true
+        end
     end
 
     eventNewGame = function()
-        for name, player in next, tfm.get.room.playerList do
-            eventNewPlayer(name)
-        end
         if not started then
+            for name, player in next, tfm.get.room.playerList do
+                eventNewPlayer(name)
+            end
             for admin in next, module.subRoomAdmins do
                 displayConfigMenu(admin)
                 tfm.exec.addImage("170f8ccde22.png", ":1", 750, 320, admin) -- cogwheel icon

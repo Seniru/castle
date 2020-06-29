@@ -42,7 +42,9 @@ local translations = {}
 
 module.translate = function(term, language, page, kwargs)
     local translation = translations[lang] and translations[lang][term] or translations.en[term]
-    return string.format((page and translation[page] or translation), kwargs)
+    translation = page and translation[page] or translation
+    if not translation then return end
+    return string.format(translation, kwargs)
 end
 
 
