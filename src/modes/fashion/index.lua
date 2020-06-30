@@ -7,6 +7,7 @@ function()
     system.disableChatCommandDisplay()
     tfm.exec.disableAfkDeath()
     tfm.exec.disableAutoNewGame()
+    tfm.exec.disableAutoTimeLeft()
     tfm.exec.disableAutoShaman()
     tfm.exec.disablePhysicalConsumables()
     tfm.exec.disableAfkDeath()
@@ -178,7 +179,35 @@ function()
 
         help = function(name, commu, args)
             addTextArea(7, module.translate("fs_help", commu, type(args) == "table" and "main" or args), name, 100, 50, 600, 320, true, true)
-        end        
+        end,
+        
+        c = function(name, commu, args)
+            if not module.subRoomAdmins[name] then return tfm.exec.chatMessage(module.translate("error_auth"), commu) end
+            if #args == 0 then return end
+            local n, d = name:match("(.-)#(%d+)")
+            local msg = "<D>•</D><N> [</N><D>" .. n .. "</D><font size='8'><G>" .. d .. "</G></font><N>] " .. table.concat(args, " ") .. "</N>"
+            for admin in next, module.subRoomAdmins do
+                tfm.exec.chatMessage(msg, admin)
+            end
+        end,
+
+        pw = function(name, commu, args)
+            if not module.subRoomAdmins[name] then return tfm.exec.chatMessage(module.translate("error_auth"), commu) end
+            local pw = table.concat(args, " ")
+            tfm.exec.setRoomPassword(pw)
+            tfm.exec.chatMessage(module.translate("password", commu, nil, {pw = pw}))
+        end,
+
+        spec = function(name, commu, args)
+            if participants[name] then
+                participants[name] = nil
+                participantCount = participantCount - 1
+                tfm.exec.killPlayer(name)
+                tfm.exec.setNameColor(name, 0xffffff)
+                checkWinners()
+            end
+        end
+
     }
     
     -- [[ fashion show config functions]] --
@@ -236,7 +265,6 @@ function()
             value = tonumber(value)
             if not value then return tfm.exec.chatMessage(module.translate("error_invalid_input", commu), target) end
             round.dur = value
-            tfm.exec.chatMessage(module.translate("error_invalid_input", commu), target)
             round.displayConfigMenu(target)
         end,
         -- elimination popup
@@ -265,7 +293,7 @@ function()
             for name in next, participants do
                 res = res .. name .. ", "
             end
-            addTextArea(2, res:sub(1, -2), target, 275, 100, 250, 200, true, false)
+            addTextArea(2, res:sub(1, -3), target, 275, 100, 250, 200, true, false)
             table.insert(closeSequence[2][target].txtareas, ui_addTextArea(2000, "<p align='center'><a href='event:close'>OK</a></p>", target, 290, 260, 225, 20, nil, 0x324650, 1, true))
             closeSequence[2][target].onclose = function(target)
                 if module.subRoomAdmins[target] then
@@ -512,18 +540,28 @@ function()
             participants[out] = nil
             participantCount = participantCount - 1
             tfm.exec.chatMessage(module.translate("fs_eliminated", tfm.get.room.community, nil, {player = out}))
-            if participantCount == 1 then
-                local winner = next(participants)
-                tfm.exec.chatMessage(module.translate("fs_winner",  tfm.get.room.community, nil, {winner = winner}))
-                over = true
-                for player in next, tfm.get.room.playerList do
-                    system.bindMouse(player, false)
-                end
-                ui.removeTextArea(4)
-                ui.removeTextArea(6)
-            end
+            checkWinners()
         else
             tfm.exec.chatMessage(module.translate("fs_error_not_playing", commu), target)
+        end
+    end
+
+    checkWinners = function()
+        if not started then return end
+        if participantCount == 0 then
+            over = true
+            tfm.exec.chatMessage(module.translate("fs_all_participants_left", tfm.get.room.community))
+        elseif participantCount == 1 then
+            local winner = next(participants)
+            tfm.exec.chatMessage(module.translate("fs_winner",  tfm.get.room.community, nil, {winner = winner}))
+            over = true
+        end
+        if over then
+            for player in next, tfm.get.room.playerList do
+                system.bindMouse(player, false)
+            end
+            ui.removeTextArea(4)
+            ui.removeTextArea(6)
         end
     end
     
@@ -572,6 +610,8 @@ function()
             participantCount = participantCount - 1
             participants[left] = nil
         end
+        -- handling things after removing left players
+        checkWinners()
     end
 
     round.displayConfigMenu = function(target, updated)
@@ -718,6 +758,7 @@ function()
             tfm.exec.movePlayer(name, cp.x, cp.y)
         elseif participants[name] then
             tfm.exec.movePlayer(name, settings.playerSpawn.x, settings.playerSpawn.y)
+            tfm.exec.setNameColor(name, 0x00E5EE)
         else
             tfm.exec.movePlayer(name, settings.specSpawn.x, settings.specSpawn.y)
         end
@@ -728,6 +769,14 @@ function()
         system.bindKeyboard(name, keys.E, true, true)
         eventPlayerDied(name)
         tfm.exec.chatMessage(module.translate("fs_welcome", tfm.get.room.playerList[name].community), name)
+        if module.subRoomAdmins[name] then
+            if not started then displayConfigMenu(admin) end
+            tfm.exec.addImage("170f8ccde22.png", ":1", 750, 320, name) -- cogwheel icon
+            ui.addTextArea(4, "<a href='event:config'>\n\n\n\n</a>", name, 750, 320, 50, 50, nil, nil, 0, true)
+        end
+        if leftPlayers[name] then
+            leftPlayers[name] = nil
+        end
     end
 
     eventPlayerLeft = function(name)
@@ -736,21 +785,24 @@ function()
         end
     end
 
-    eventNewGame = function()
+    --[[eventNewGame = function()
         if not started then
-            for name, player in next, tfm.get.room.playerList do
-                eventNewPlayer(name)
-            end
             for admin in next, module.subRoomAdmins do
                 displayConfigMenu(admin)
                 tfm.exec.addImage("170f8ccde22.png", ":1", 750, 320, admin) -- cogwheel icon
                 ui.addTextArea(4, "<a href='event:config'>\n\n\n\n</a>", admin, 750, 320, 50, 50, nil, nil, 0, true)
             end
         end
-    end
+    end]]
 
     eventLoop = function()
         Timer.process()
+    end
+
+    do
+        for name, player in next, tfm.get.room.playerList do
+            eventNewPlayer(name)
+        end
     end
 
 end

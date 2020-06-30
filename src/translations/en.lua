@@ -9,6 +9,7 @@ translations.en = {
     error_invalid_input = "<N>[</N><R>•</R><N>] <R>Error: Invlid input!</R>",
     error_auth = "<N>[</N><R>•</R><N>] <R>Error: Authorisation</R>",
     admins = "<N>[</N><D>•</D><N>] </N><D>Admins: </D>",
+    password = "<N>[</N><D>•</D><N>] </N><D>Password: </D><N>${pw}</N>",
     welcome0graphs = "<br><N><p align='center'>Welcome to <b><D>#castle0graphs</D></b><br>Report any bugs or suggest interesting functions to <b><O>King_seniru</O><G><font size='8'>#5890</font></G></b><br><br>Type <b><BV>!commands</BV></b> to check out the available commands</p></N><br>",
     cmds0graphs = "<BV>!admin <name></BV> - Makes a player admin <R><i>(admin only command)</i></R>",
     fs_welcome = "<br><N><p align='center'>Welcome to <b><D>#castle0fashion</D></b> - the Fashion show!<br><br><br>Type <b><BV>!join</BV></b> to participate the game or <b><BV>!help</BV></b> to see more things about this module!</p></N><br>",
@@ -50,11 +51,12 @@ translations.en = {
     fs_newround = "<N>[</N><D>•</D><N>] <b><D>Round ${round} started!</D></b><br>\t<FC>• Theme:</FC> <N>${theme} (${type})</N><br>\t<FC>• Duration:</FC> <N>${dur}</N><br>\t<FC>• Players left:</FC> <N>${players}</N>",
     fs_round_end = "<N>[</N><D>•</D><N>] Round <D>${round}</D> ended! Judging in progress...</N>",
     fs_eliminated = "<N>[</N><D>•</D><N>] ${player} has been eliminated from the fashion show >:(</N>",
-    fs_elimination_end = "<p align='center'><b><a href='event:newround'>Done!</a></b></p>",
+    fs_elimination_end = "<p align='center'><b><a href='event:newround'>End round!</a></b></p>",
     fs_maxplayers_error = "<N>[</N><R>•</R><N>] Sorry, the fashion show already got enough participants :(",
     fs_elimination_confirm = "Eliminate ${name}?",
     fs_error_not_playing = "<R>The selected player is not a participant!",
     fs_players_not_enough = "<N>[</N><R>•</R><N>] <R>Error: Not enough players!</R>",
+    fs_all_participants_left = "<N>[</N><R>•</R><N>] <R>All the participants left, couldn`t determine a winner!</R>",
     fs_winner = "<N>[</N><D>•</D><N>] <b><D>Fashion show ended!</D><br>... and the winner is <D>${winner}</D>! Good job!</b></N>",
     fs_help = {
         ["main"] = "<p align='center'><font size='20' color='#ffcc00'><b>Help</b></font></p><br>" ..
@@ -64,11 +66,13 @@ translations.en = {
         ["commands"] = "<p align='center'><font size='20' color='#ffcc00'><b>Help - Commands</b></font></p><br>" ..
             "<b>!admin [name]</b> - make a player an admin (admin only command)<br>" ..
             "<b>!admins</b> - shows a list of admins<br>" ..
-            "<b>!checkpoint [all|<me>]</b> - set checkpoints (E)" ..
+            "<b>!c [message] - chat with other room admins</b><br>" ..
+            "<b>!checkpoint [all|<me>]</b> - set checkpoints (E)<br>" ..
             "<b>!eliminate [name]</b> - eliminates the player from the round (admin only command) (Shift + click)<br>" ..
             "<b>!help</b> - displays this help menu<br>" ..
             "<b>!join</b> - joins the fashion show, if you haven`t participated yet<br>" ..
             "<b>!omo <text></b> - displays an omo - like in utility (admin only command)<br>" ..
+            "<b>!pw <pw> - sets a password, send empty password to unset it</b><br>" ..
             "<b>!s [me|admins|all|name]</b> - make players shaman according to the arguments provided or the name (admin only command)<br>" ..
             "<b>!stop</b> - force stop the current round<br>" ..
             "<b>!tp [me|admins|all|name]</b> - teleports a players according to the arguments provided or the name (admin only command)<br><br><a href='event:help:main'><BV>« Back</BV></a>",
