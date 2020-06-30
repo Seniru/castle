@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Seniru/castle/issues"
   },
-  "homepage": "https://github.com/Seniru/castle#readme"
+  "homepage": "https://github.com/Seniru/castle#readme",
+  "dependencies": {
+    "chalk": "^4.1.0"
+  }
 }
