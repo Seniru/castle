@@ -10,9 +10,12 @@ translations.en = {
     error_auth = "<N>[</N><R>•</R><N>] <R>Error: Authorisation</R>",
     admins = "<N>[</N><D>•</D><N>] </N><D>Admins: </D>",
     password = "<N>[</N><D>•</D><N>] </N><D>Password: </D><N>${pw}</N>",
+    ban = "<N>[</N><R>•</R><N>] <R>${player} has been banned!</R>",
+    unban = "<N>[</N><D>•</D><N>] </N><D>${player}</D> <N>has been unbanned!</N>",
     welcome0graphs = "<br><N><p align='center'>Welcome to <b><D>#castle0graphs</D></b><br>Report any bugs or suggest interesting functions to <b><O>King_seniru</O><G><font size='8'>#5890</font></G></b><br><br>Type <b><BV>!commands</BV></b> to check out the available commands</p></N><br>",
     cmds0graphs = "<BV>!admin <name></BV> - Makes a player admin <R><i>(admin only command)</i></R>",
     fs_welcome = "<br><N><p align='center'>Welcome to <b><D>#castle0fashion</D></b> - the Fashion show!<br><br><br>Type <b><BV>!join</BV></b> to participate the game or <b><BV>!help</BV></b> to see more things about this module!</p></N><br>",
+    fs_info = "<p align='center'><font size='15' color='#ffcc00'><b>${owner} Fashion Show!</b></font><br><D><b>${title}</b></D></p><br><b>Description</b>: ${desc}<br><b>Prize</b>: ${prize}",
     configmenu = "<p align='center'><font size='20' color='#ffcc00'><b>Config menu</b></font></p><br>" ..
         "<b>Title</b>: <a href='event:fs:title'>${title}</a><br>" ..
         "<b>Description</b>: <a href='event:fs:desc'>${desc}</a><br>" ..
@@ -66,21 +69,24 @@ translations.en = {
         ["commands"] = "<p align='center'><font size='20' color='#ffcc00'><b>Help - Commands</b></font></p><br>" ..
             "<b>!admin [name]</b> - make a player an admin (admin only command)<br>" ..
             "<b>!admins</b> - shows a list of admins<br>" ..
-            "<b>!c [message] - chat with other room admins</b><br>" ..
+            "<b>!ban [name]</b> - bans the mentioned player (admin only command)<br>" ..
+            "<b>!c [message]</b> - chat with other room admins</b><br>" ..
             "<b>!checkpoint [all|<me>]</b> - set checkpoints (E)<br>" ..
             "<b>!eliminate [name]</b> - eliminates the player from the round (admin only command) (Shift + click)<br>" ..
             "<b>!help</b> - displays this help menu<br>" ..
             "<b>!join</b> - joins the fashion show, if you haven`t participated yet<br>" ..
             "<b>!omo <text></b> - displays an omo - like in utility (admin only command)<br>" ..
-            "<b>!pw <pw> - sets a password, send empty password to unset it</b><br>" ..
+            "<b>!pw <pw></b> - sets a password, send empty password to unset it (admin only command)</b><br>" ..
             "<b>!s [me|admins|all|name]</b> - make players shaman according to the arguments provided or the name (admin only command)<br>" ..
             "<b>!stop</b> - force stop the current round<br>" ..
-            "<b>!tp [me|admins|all|name]</b> - teleports a players according to the arguments provided or the name (admin only command)<br><br><a href='event:help:main'><BV>« Back</BV></a>",
+            "<b>!tp [me|admins|all|name]</b> - teleports a players according to the arguments provided or the name (admin only command)<br>" ..
+            "<b>!unban [name]</b> - unbans the mentioned user (admin only command)</b>" ..
+            "<br><br><a href='event:help:main'><BV>« Back</BV></a>",
         ["keys"] = "<p align='center'><font size='20' color='#ffcc00'><b>Help - Keys</b></font></p><br>" ..
             "<b>E</b> - set a checkpoint<br>" ..
             "<b>Shift + Click (on player)</b> - eliminates a player after the round <i>(admin only)</i><br><br><a href='event:help:main'><BV>« Back</BV></a>",
         ["credits"] = "<p align='center'><font size='20' color='#ffcc00'><b>Help - Credits</b></font></p><br>" ..
             "<b><D>Testing</D></b><br>" ..
-            "• Snowvlokje#4925<br>• Lpspopcorn#0000<br>• Light#5990<br>• Lilylolarose#0000<br><br>Also thanks for <b>Snowvlokje#4925</b> and the tribe <b>We Talk a Lot</b> to encouraging me and supporting me to do this work!<br><br><a href='event:help:main'><BV>« Back</BV></a>"
+            "• Snowvlokje#4925<br>• Michelleding#0000<br>• Lpspopcorn#0000<br>• Light#5990<br>• Lilylolarose#0000<br><br>Also thanks for <b>Snowvlokje#4925</b>, <b>Michelleding#0000</b> and the tribe <b>We Talk a Lot</b> to encouraging me and supporting me to do this work!<br><br><a href='event:help:main'><BV>« Back</BV></a>"
     }
 }

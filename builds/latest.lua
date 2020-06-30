@@ -90,9 +90,13 @@ translations.en = {
     error_invalid_input = "<N>[</N><R>•</R><N>] <R>Error: Invlid input!</R>",
     error_auth = "<N>[</N><R>•</R><N>] <R>Error: Authorisation</R>",
     admins = "<N>[</N><D>•</D><N>] </N><D>Admins: </D>",
+    password = "<N>[</N><D>•</D><N>] </N><D>Password: </D><N>${pw}</N>",
+    ban = "<N>[</N><R>•</R><N>] <R>${player} has been banned!</R>",
+    unban = "<N>[</N><D>•</D><N>] </N><D>${player}</D> <N>has been unbanned!</N>",
     welcome0graphs = "<br><N><p align='center'>Welcome to <b><D>#castle0graphs</D></b><br>Report any bugs or suggest interesting functions to <b><O>King_seniru</O><G><font size='8'>#5890</font></G></b><br><br>Type <b><BV>!commands</BV></b> to check out the available commands</p></N><br>",
     cmds0graphs = "<BV>!admin <name></BV> - Makes a player admin <R><i>(admin only command)</i></R>",
     fs_welcome = "<br><N><p align='center'>Welcome to <b><D>#castle0fashion</D></b> - the Fashion show!<br><br><br>Type <b><BV>!join</BV></b> to participate the game or <b><BV>!help</BV></b> to see more things about this module!</p></N><br>",
+    fs_info = "<p align='center'><font size='15' color='#ffcc00'><b>${owner} Fashion Show!</b></font><br><D><b>${title}</b></D></p><br><b>Description</b>: ${desc}<br><b>Prize</b>: ${prize}",
     configmenu = "<p align='center'><font size='20' color='#ffcc00'><b>Config menu</b></font></p><br>" ..
         "<b>Title</b>: <a href='event:fs:title'>${title}</a><br>" ..
         "<b>Description</b>: <a href='event:fs:desc'>${desc}</a><br>" ..
@@ -131,11 +135,12 @@ translations.en = {
     fs_newround = "<N>[</N><D>•</D><N>] <b><D>Round ${round} started!</D></b><br>\t<FC>• Theme:</FC> <N>${theme} (${type})</N><br>\t<FC>• Duration:</FC> <N>${dur}</N><br>\t<FC>• Players left:</FC> <N>${players}</N>",
     fs_round_end = "<N>[</N><D>•</D><N>] Round <D>${round}</D> ended! Judging in progress...</N>",
     fs_eliminated = "<N>[</N><D>•</D><N>] ${player} has been eliminated from the fashion show >:(</N>",
-    fs_elimination_end = "<p align='center'><b><a href='event:newround'>Done!</a></b></p>",
+    fs_elimination_end = "<p align='center'><b><a href='event:newround'>End round!</a></b></p>",
     fs_maxplayers_error = "<N>[</N><R>•</R><N>] Sorry, the fashion show already got enough participants :(",
     fs_elimination_confirm = "Eliminate ${name}?",
     fs_error_not_playing = "<R>The selected player is not a participant!",
     fs_players_not_enough = "<N>[</N><R>•</R><N>] <R>Error: Not enough players!</R>",
+    fs_all_participants_left = "<N>[</N><R>•</R><N>] <R>All the participants left, couldn`t determine a winner!</R>",
     fs_winner = "<N>[</N><D>•</D><N>] <b><D>Fashion show ended!</D><br>... and the winner is <D>${winner}</D>! Good job!</b></N>",
     fs_help = {
         ["main"] = "<p align='center'><font size='20' color='#ffcc00'><b>Help</b></font></p><br>" ..
@@ -145,20 +150,25 @@ translations.en = {
         ["commands"] = "<p align='center'><font size='20' color='#ffcc00'><b>Help - Commands</b></font></p><br>" ..
             "<b>!admin [name]</b> - make a player an admin (admin only command)<br>" ..
             "<b>!admins</b> - shows a list of admins<br>" ..
-            "<b>!checkpoint [all|<me>]</b> - set checkpoints (E)" ..
+            "<b>!ban [name]</b> - bans the mentioned player (admin only command)<br>" ..
+            "<b>!c [message]</b> - chat with other room admins</b><br>" ..
+            "<b>!checkpoint [all|<me>]</b> - set checkpoints (E)<br>" ..
             "<b>!eliminate [name]</b> - eliminates the player from the round (admin only command) (Shift + click)<br>" ..
             "<b>!help</b> - displays this help menu<br>" ..
             "<b>!join</b> - joins the fashion show, if you haven`t participated yet<br>" ..
             "<b>!omo <text></b> - displays an omo - like in utility (admin only command)<br>" ..
+            "<b>!pw <pw></b> - sets a password, send empty password to unset it (admin only command)</b><br>" ..
             "<b>!s [me|admins|all|name]</b> - make players shaman according to the arguments provided or the name (admin only command)<br>" ..
             "<b>!stop</b> - force stop the current round<br>" ..
-            "<b>!tp [me|admins|all|name]</b> - teleports a players according to the arguments provided or the name (admin only command)<br><br><a href='event:help:main'><BV>« Back</BV></a>",
+            "<b>!tp [me|admins|all|name]</b> - teleports a players according to the arguments provided or the name (admin only command)<br>" ..
+            "<b>!unban [name]</b> - unbans the mentioned user (admin only command)</b>" ..
+            "<br><br><a href='event:help:main'><BV>« Back</BV></a>",
         ["keys"] = "<p align='center'><font size='20' color='#ffcc00'><b>Help - Keys</b></font></p><br>" ..
             "<b>E</b> - set a checkpoint<br>" ..
             "<b>Shift + Click (on player)</b> - eliminates a player after the round <i>(admin only)</i><br><br><a href='event:help:main'><BV>« Back</BV></a>",
         ["credits"] = "<p align='center'><font size='20' color='#ffcc00'><b>Help - Credits</b></font></p><br>" ..
             "<b><D>Testing</D></b><br>" ..
-            "• Snowvlokje#4925<br>• Lpspopcorn#0000<br>• Light#5990<br>• Lilylolarose#0000<br><br>Also thanks for <b>Snowvlokje#4925</b> and the tribe <b>We Talk a Lot</b> to encouraging me and supporting me to do this work!<br><br><a href='event:help:main'><BV>« Back</BV></a>"
+            "• Snowvlokje#4925<br>• Michelleding#0000<br>• Lpspopcorn#0000<br>• Light#5990<br>• Lilylolarose#0000<br><br>Also thanks for <b>Snowvlokje#4925</b>, <b>Michelleding#0000</b> and the tribe <b>We Talk a Lot</b> to encouraging me and supporting me to do this work!<br><br><a href='event:help:main'><BV>« Back</BV></a>"
     }
 }
 
@@ -297,6 +307,7 @@ modes.fashion.main = function()
     system.disableChatCommandDisplay()
     tfm.exec.disableAfkDeath()
     tfm.exec.disableAutoNewGame()
+    tfm.exec.disableAutoTimeLeft()
     tfm.exec.disableAutoShaman()
     tfm.exec.disablePhysicalConsumables()
     tfm.exec.disableAfkDeath()
@@ -324,6 +335,7 @@ modes.fashion.main = function()
     local participants = {}
     local participantCount = 0
     local leftPlayers = {}
+    local banned = {}
 
     local settings = {
         title = "",
@@ -374,6 +386,8 @@ modes.fashion.main = function()
                     module.subRoomAdmins[args[1]] = true
                     tfm.exec.chatMessage(module.translate("new_roomadmin", tfm.get.room.community, nil, {name = args[1]}))
                     if not started then displayConfigMenu(args[1]) end
+                    tfm.exec.addImage("170f8ccde22.png", ":1", 750, 320, args[1]) -- cogwheel icon
+                    ui.addTextArea(4, "<a href='event:config'>\n\n\n\n</a>", args[1], 750, 320, 50, 50, nil, nil, 0, true)
                 else
                     tfm.exec.chatMessage(module.translate("error_auth", commu), name)
                 end
@@ -427,6 +441,7 @@ modes.fashion.main = function()
         end,
 
         join = function(name, commu, args)
+            if banned[name] then return end
             if not participants[name] then
                 if settings.maxPlayers <= participantCount then
                     tfm.exec.chatMessage(module.translate("fs_maxplayers_error", commu), name)
@@ -468,7 +483,67 @@ modes.fashion.main = function()
 
         help = function(name, commu, args)
             addTextArea(7, module.translate("fs_help", commu, type(args) == "table" and "main" or args), name, 100, 50, 600, 320, true, true)
-        end        
+        end,
+        
+        c = function(name, commu, args)
+            if not module.subRoomAdmins[name] then return tfm.exec.chatMessage(module.translate("error_auth"), commu) end
+            if #args == 0 then return end
+            local n, d = name:match("(.-)#(%d+)")
+            local msg = "<D>•</D><N> [</N><D>" .. n .. "</D><font size='8'><G>" .. d .. "</G></font><N>] " .. table.concat(args, " ") .. "</N>"
+            for admin in next, module.subRoomAdmins do
+                tfm.exec.chatMessage(msg, admin)
+            end
+        end,
+
+        pw = function(name, commu, args)
+            if not module.subRoomAdmins[name] then return tfm.exec.chatMessage(module.translate("error_auth"), commu) end
+            local pw = table.concat(args, " ")
+            tfm.exec.setRoomPassword(pw)
+            tfm.exec.chatMessage(module.translate("password", commu, nil, {pw = pw}))
+        end,
+
+        spec = function(name, commu, args)
+            if participants[name] then
+                participants[name] = nil
+                participantCount = participantCount - 1
+                tfm.exec.killPlayer(name)
+                tfm.exec.setNameColor(name, 0xffffff)
+                checkWinners()
+            end
+        end,
+
+        ban = function(name, commu, args)
+            local toBan = args[1]
+            if (not module.subRoomAdmins[name]) or module.subRoomAdmins[toBan] then return tfm.exec.chatMessage(module.translate("error_auth", commu), name) end
+            banned[toBan] = true
+            tfm.exec.chatMessage(module.translate("ban", tfm.get.room.community, nil, {player = toBan}))
+            if tfm.get.room.playerList[toBan] then
+                tfm.exec.killPlayer(toBan)
+                if participants[toBan] then
+                    participants[toBan] = nil
+                    participantCount = participantCount - 1
+                    checkWinners()
+                end
+            end
+        end,
+
+        unban = function(name, commu, args)
+            if not module.subRoomAdmins[name] then return tfm.exec.chatMessage(module.translate("error_auth"), commu) end
+            local toUnban = args[1]
+            if banned[toUnban] then
+                banned[toUnban] = nil
+                tfm.exec.respawnPlayer(toUnban)
+            end
+        end,
+
+        info = function(name, commu, args)
+            addTextArea(8, module.translate("fs_info", commu, nil, {
+                owner = module.roomAdmin and module.roomAdmin .. "`s " or "",
+                title = settings.title == "" and "" or ("« " .. settings.title .. " »"),
+                desc = settings.desc == "" and "-" or settings.desc,
+                prize = settings.prize == "" and "-" or settings.prize
+            }), name, 275, 100, 250, 200, true, true)
+        end
     }
     
     -- [[ fashion show config functions]] --
@@ -526,7 +601,6 @@ modes.fashion.main = function()
             value = tonumber(value)
             if not value then return tfm.exec.chatMessage(module.translate("error_invalid_input", commu), target) end
             round.dur = value
-            tfm.exec.chatMessage(module.translate("error_invalid_input", commu), target)
             round.displayConfigMenu(target)
         end,
         -- elimination popup
@@ -555,7 +629,7 @@ modes.fashion.main = function()
             for name in next, participants do
                 res = res .. name .. ", "
             end
-            addTextArea(2, res:sub(1, -2), target, 275, 100, 250, 200, true, false)
+            addTextArea(2, res:sub(1, -3), target, 275, 100, 250, 200, true, false)
             table.insert(closeSequence[2][target].txtareas, ui_addTextArea(2000, "<p align='center'><a href='event:close'>OK</a></p>", target, 290, 260, 225, 20, nil, 0x324650, 1, true))
             closeSequence[2][target].onclose = function(target)
                 if module.subRoomAdmins[target] then
@@ -802,18 +876,28 @@ modes.fashion.main = function()
             participants[out] = nil
             participantCount = participantCount - 1
             tfm.exec.chatMessage(module.translate("fs_eliminated", tfm.get.room.community, nil, {player = out}))
-            if participantCount == 1 then
-                local winner = next(participants)
-                tfm.exec.chatMessage(module.translate("fs_winner",  tfm.get.room.community, nil, {winner = winner}))
-                over = true
-                for player in next, tfm.get.room.playerList do
-                    system.bindMouse(player, false)
-                end
-                ui.removeTextArea(4)
-                ui.removeTextArea(6)
-            end
+            checkWinners()
         else
             tfm.exec.chatMessage(module.translate("fs_error_not_playing", commu), target)
+        end
+    end
+
+    checkWinners = function()
+        if not started then return end
+        if participantCount == 0 then
+            over = true
+            tfm.exec.chatMessage(module.translate("fs_all_participants_left", tfm.get.room.community))
+        elseif participantCount == 1 then
+            local winner = next(participants)
+            tfm.exec.chatMessage(module.translate("fs_winner",  tfm.get.room.community, nil, {winner = winner}))
+            over = true
+        end
+        if over then
+            for player in next, tfm.get.room.playerList do
+                system.bindMouse(player, false)
+            end
+            ui.removeTextArea(4)
+            ui.removeTextArea(6)
         end
     end
     
@@ -862,6 +946,8 @@ modes.fashion.main = function()
             participantCount = participantCount - 1
             participants[left] = nil
         end
+        -- handling things after removing left players
+        checkWinners()
     end
 
     round.displayConfigMenu = function(target, updated)
@@ -1002,12 +1088,14 @@ modes.fashion.main = function()
     end
 
     eventPlayerDied = function(name)
+        if banned[name] then return end
         tfm.exec.respawnPlayer(name)
         if players[name].checkpoint then
             local cp = players[name].checkpoint
             tfm.exec.movePlayer(name, cp.x, cp.y)
         elseif participants[name] then
             tfm.exec.movePlayer(name, settings.playerSpawn.x, settings.playerSpawn.y)
+            tfm.exec.setNameColor(name, 0x00E5EE)
         else
             tfm.exec.movePlayer(name, settings.specSpawn.x, settings.specSpawn.y)
         end
@@ -1018,6 +1106,14 @@ modes.fashion.main = function()
         system.bindKeyboard(name, keys.E, true, true)
         eventPlayerDied(name)
         tfm.exec.chatMessage(module.translate("fs_welcome", tfm.get.room.playerList[name].community), name)
+        if module.subRoomAdmins[name] then
+            if not started then displayConfigMenu(admin) end
+            tfm.exec.addImage("170f8ccde22.png", ":1", 750, 320, name) -- cogwheel icon
+            ui.addTextArea(4, "<a href='event:config'>\n\n\n\n</a>", name, 750, 320, 50, 50, nil, nil, 0, true)
+        end
+        if leftPlayers[name] then
+            leftPlayers[name] = nil
+        end
     end
 
     eventPlayerLeft = function(name)
@@ -1026,21 +1122,24 @@ modes.fashion.main = function()
         end
     end
 
-    eventNewGame = function()
+    --[[eventNewGame = function()
         if not started then
-            for name, player in next, tfm.get.room.playerList do
-                eventNewPlayer(name)
-            end
             for admin in next, module.subRoomAdmins do
                 displayConfigMenu(admin)
                 tfm.exec.addImage("170f8ccde22.png", ":1", 750, 320, admin) -- cogwheel icon
                 ui.addTextArea(4, "<a href='event:config'>\n\n\n\n</a>", admin, 750, 320, 50, 50, nil, nil, 0, true)
             end
         end
-    end
+    end]]
 
     eventLoop = function()
         Timer.process()
+    end
+
+    do
+        for name, player in next, tfm.get.room.playerList do
+            eventNewPlayer(name)
+        end
     end
 
 end

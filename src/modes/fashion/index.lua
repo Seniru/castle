@@ -35,6 +35,7 @@ function()
     local participants = {}
     local participantCount = 0
     local leftPlayers = {}
+    local banned = {}
 
     local settings = {
         title = "",
@@ -85,6 +86,8 @@ function()
                     module.subRoomAdmins[args[1]] = true
                     tfm.exec.chatMessage(module.translate("new_roomadmin", tfm.get.room.community, nil, {name = args[1]}))
                     if not started then displayConfigMenu(args[1]) end
+                    tfm.exec.addImage("170f8ccde22.png", ":1", 750, 320, args[1]) -- cogwheel icon
+                    ui.addTextArea(4, "<a href='event:config'>\n\n\n\n</a>", args[1], 750, 320, 50, 50, nil, nil, 0, true)
                 else
                     tfm.exec.chatMessage(module.translate("error_auth", commu), name)
                 end
@@ -138,6 +141,7 @@ function()
         end,
 
         join = function(name, commu, args)
+            if banned[name] then return end
             if not participants[name] then
                 if settings.maxPlayers <= participantCount then
                     tfm.exec.chatMessage(module.translate("fs_maxplayers_error", commu), name)
@@ -206,8 +210,40 @@ function()
                 tfm.exec.setNameColor(name, 0xffffff)
                 checkWinners()
             end
-        end
+        end,
 
+        ban = function(name, commu, args)
+            local toBan = args[1]
+            if (not module.subRoomAdmins[name]) or module.subRoomAdmins[toBan] then return tfm.exec.chatMessage(module.translate("error_auth", commu), name) end
+            banned[toBan] = true
+            tfm.exec.chatMessage(module.translate("ban", tfm.get.room.community, nil, {player = toBan}))
+            if tfm.get.room.playerList[toBan] then
+                tfm.exec.killPlayer(toBan)
+                if participants[toBan] then
+                    participants[toBan] = nil
+                    participantCount = participantCount - 1
+                    checkWinners()
+                end
+            end
+        end,
+
+        unban = function(name, commu, args)
+            if not module.subRoomAdmins[name] then return tfm.exec.chatMessage(module.translate("error_auth"), commu) end
+            local toUnban = args[1]
+            if banned[toUnban] then
+                banned[toUnban] = nil
+                tfm.exec.respawnPlayer(toUnban)
+            end
+        end,
+
+        info = function(name, commu, args)
+            addTextArea(8, module.translate("fs_info", commu, nil, {
+                owner = module.roomAdmin and module.roomAdmin .. "`s " or "",
+                title = settings.title == "" and "" or ("« " .. settings.title .. " »"),
+                desc = settings.desc == "" and "-" or settings.desc,
+                prize = settings.prize == "" and "-" or settings.prize
+            }), name, 275, 100, 250, 200, true, true)
+        end
     }
     
     -- [[ fashion show config functions]] --
@@ -752,6 +788,7 @@ function()
     end
 
     eventPlayerDied = function(name)
+        if banned[name] then return end
         tfm.exec.respawnPlayer(name)
         if players[name].checkpoint then
             local cp = players[name].checkpoint
