@@ -1,0 +1,7 @@
+{
+    "name": "lavarun",
+    "version": "v1.0.0",
+    "description": "Beta version of #lavarun module<br>/room #lavarun",
+    "author": "Aron#6810",
+    "main": "index.lua"
+}
