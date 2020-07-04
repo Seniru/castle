@@ -1,0 +1,7 @@
+{
+    "name": "frost",
+    "version": "v0.0.1",
+    "description": "Early prototype of the frost module",
+    "author": "Aron#6810",
+    "main": "index.lua"
+}
