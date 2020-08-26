@@ -2078,7 +2078,7 @@ end
 modes.pewpew = {
 	version = "v0.0.1-beta",
 	description = "Pewpew (new) BETA",
-	author = "Aron#6810"
+	author = "King_seniru#5890"
 }
 
 modes.pewpew.main = function()
