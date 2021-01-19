@@ -311,11 +311,14 @@ modes.dodge.main = function()
     tfm.exec.disableAutoTimeLeft(true)  
     tfm.exec.setGameTime(0)
     tfm.exec.disableAutoScore(true)
+    tfm.exec.disableMinimalistMode()
+    tfm.exec.disableMortCommand()
+    tfm.exec.disablePhysicalConsumables()
  
      system.disableChatCommandDisplay("help")
       system.disableChatCommandDisplay("modos")
  
-     print("<img src='https://i.imgur.com/CsIOXFg.png' /><br /><br /><br /><br /><br /> <br>")
+   
  
      boxes={
         help={
@@ -416,7 +419,7 @@ modes.dodge.main = function()
                 end
                 --modio dios
                 if dios == 80 then
-                    tfm.exec.setUIMapName("<YELLOW>#dodge by factral| Modo Dios En Unos Segundos ... .. . .. . ")
+                   tfm.exec.setUIMapName("<YELLOW>#dodge by factral  <font color='#5c5474'>|</font> <N> Modo Dios En Unos Segundos.... ... .. .")
                 end
                 if dios == 100 then
                     local value = math.random(1,#cannones) -- Get random number with 1 to length of table.
@@ -424,7 +427,11 @@ modes.dodge.main = function()
                     idCannon=picked_value
                 end
                 if dios >= 100 and not modoCrono then
-                    tfm.exec.setUIMapName("<YELLOW>#dodge by factral        <N>Ronda: <V>"..numeroRonda.."/7      <N>Modo: <V>Estandar")
+                     if  modoIndividual then
+                   	 tfm.exec.setUIMapName("<YELLOW>#dodge by factral              <N>Modo: <V>Individual")
+                    else
+                   	 tfm.exec.setUIMapName("<YELLOW>#dodge by factral        <N>Ronda: <V>"..numeroRonda.."/7      <N>Modo: <V>Estandar")
+                    end
                     tfm.exec.addShamanObject(idCannon, 840, math.random()*350, 270)
                     tfm.exec.addShamanObject(idCannon, 840, math.random()*350, 225)
                 end
@@ -454,8 +461,11 @@ modes.dodge.main = function()
                  if rondaFinal and countdown ==3 then
                   tfm.exec.newGame(7815400)                            
                   ui.addTextArea(6, "<p align='center'><font color='#ffe300' size='14'><b>".. campeon.. "</font><N> Ha ganado!" , final , 200, 30, 400, 23,0x373737,0x373737)
-                  tfm.exec.setGameTime(25)
-                  tfm.exec.movePlayer(campeon,400,210)
+                  tfm.exec.setGameTime(25)                
+                  for i=1, 50 do
+			tfm.exec.displayParticle(math.random(21,24), math.random(1,800), 20, math.random(-20,20)/100, math.random(10,1000)/100, 0, 0, nil)
+			end
+			 tfm.exec.movePlayer(campeon,400,210)
                  end
  
  
@@ -480,16 +490,17 @@ modes.dodge.main = function()
                 
             can = can + 1
                 if can <= 10 then
-                --creditos para Deadjerry y maik005 en esta parte
+                    --creditos para Deadjerry y maik005 en esta parte
                     face="Soopafresh";
-                size="120";
-                game="#Dodge";
-                color="#E7DB25";
+                    --[[size="120";
+                    game="#Dodge";
+                    color="#E7DB25";
                     ui.addTextArea(1, "<BR><B><p align='center'><font face='"..face.."' size='"..size.."' color='#000000'><BR>"..game, p, 10, -30, 790, 400, 1, 1, 0.0, false)
                     ui.addTextArea(2, "<BR><B><p align='center'><font face='"..face.."' sdize='"..size.."' color='#000000'><BR>"..game, p, 0, -30, 790, 400, 1, 1, 0.0, false)
                     ui.addTextArea(3, "<BR><B><p align='center'><font face='"..face.."' size='"..size.."' color='#EAA118'><BR>"..game, p, 5, -35, 790, 400, 1, 1, 0.0, false)
                     ui.addTextArea(4, "<BR><B><p align='center'><font face='"..face.."' size='"..size.."' color='#000000'><BR>"..game, p, 5, -25, 790, 400, 1, 1, 0.0, false)
-                    ui.addTextArea(5, "<BR><B><p align='center'><font face='"..face.."' size='"..size.."' color='"..color.."'><BR>"..game, p, 5, -30, 790, 400, 1, 1, 0.0, false)
+                    ui.addTextArea(5, "<BR><B><p align='center'><font face='"..face.."' size='"..size.."' color='"..color.."'><BR>"..game, p, 5, -30, 790, 400, 1, 1, 0.0, false)]]
+                    system.newTimer(tfm.exec.removeImage end, 1000, false, tfm.exec.addImage("176ffe7f496.png", ":1", 270, 150, nil))
                 else if can >= 11 then  
                     for i = 1,5 do
                         ui.removeTextArea(i, p)
@@ -766,6 +777,8 @@ function eventNewPlayer(name)
     end
 end
 
+tfm.exec.chatMessage("<p align='left'><font color='#638071'>[DODGE] </font><font color='#7CD499'>Welcome to </font><b><font color='#D2EC16'>#dodge </font></b><font color='#7CD499'>survive the cannons!<br>Plase Type</br> <b><font color='#33AA74'>!help</font></b> to show more information about this. </font><font color='#7CD499'>see the project repository here:</font><b><font color='#33AA74'>https://github.com/Factral/dodge</font></b></p>", name)
+
 end
     
     
@@ -878,8 +891,8 @@ function eventPlayerDied(name)
             if playersAlive  == 0 and not rondaFinal     then
                 bool = true
                 tfm.exec.setGameTime(5)
-                tfm.exec.setUIMapName("<YELLOW>#dodge by factral  |  Cambiando De Mapa.....")
-                --eliminar cañones
+                 tfm.exec.setUIMapName("<YELLOW>#dodge by factral  <font color='#5c5474'>|</font>  <N>Cambiando De Mapa.....")
+                                 --eliminar cañones
                   for idCannon, object in pairs(tfm.get.room.objectList) do
                     table.insert(IDList, idCannon)
                    end
@@ -899,7 +912,7 @@ function eventPlayerDied(name)
                             tfm.exec.removeObject(idCannon)
                         end
           
-                print("<font color='#24CBC5'>"..name.."</font> ha sobrevivido por <ROSE>"..asa.." sg</ROSE>  en el mapa <font color='#6DD6A9'>@"..codigoMapa.."</font>")
+                tfm.exec.chatMessage("<font color='#86a2ed'>has sobrevivido por <ROSE>"..asa.." sg</ROSE>  en el mapa <font color='#6DD6A9'>@"..codigoMapa.."</font></font>",name)
        ui.addTextArea(7, "<p align='center'><font size='14' color='#24CBC5'><b>"..name.. "</font><N> ha sobrevivido por "..asa.." segundos wow!" , final , 120, 30, 550, 23,0x030303,0x030303)
        
        
