@@ -77,6 +77,11 @@ function()
         local args = string.split(cmd, " ")
         if args[1] == "modes" then
             displayModes(name)
+        elseif args[1] == "pw" and module.subRoomAdmins[name] then
+            tfm.exec.chatMessage("Password: " .. args[2], name)
+            tfm.exec.setRoomPassword(args[2])
+        elseif args[1] == "np" and module.subRoomAdmins[name] then
+            tfm.exec.newGame(args[2])
         end
     end
 

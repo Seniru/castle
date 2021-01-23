@@ -269,6 +269,11 @@ modes.castle.main = function()
         local args = string.split(cmd, " ")
         if args[1] == "modes" then
             displayModes(name)
+        elseif args[1] == "pw" and module.subRoomAdmins[name] then
+            tfm.exec.chatMessage("Password: " .. args[2], name)
+            tfm.exec.setRoomPassword(args[2])
+        elseif args[1] == "np" and module.subRoomAdmins[name] then
+            tfm.exec.newGame(args[2])
         end
     end
 
@@ -500,7 +505,7 @@ modes.dodge.main = function()
                     ui.addTextArea(3, "<BR><B><p align='center'><font face='"..face.."' size='"..size.."' color='#EAA118'><BR>"..game, p, 5, -35, 790, 400, 1, 1, 0.0, false)
                     ui.addTextArea(4, "<BR><B><p align='center'><font face='"..face.."' size='"..size.."' color='#000000'><BR>"..game, p, 5, -25, 790, 400, 1, 1, 0.0, false)
                     ui.addTextArea(5, "<BR><B><p align='center'><font face='"..face.."' size='"..size.."' color='"..color.."'><BR>"..game, p, 5, -30, 790, 400, 1, 1, 0.0, false)]]
-                    system.newTimer(tfm.exec.removeImage end, 1000, false, tfm.exec.addImage("176ffe7f496.png", ":1", 270, 150, nil))
+                    system.newTimer(tfm.exec.removeImage, 1000, false, tfm.exec.addImage("176ffe7f496.png", ":1", 270, 150, nil))
                 else if can >= 11 then  
                     for i = 1,5 do
                         ui.removeTextArea(i, p)
