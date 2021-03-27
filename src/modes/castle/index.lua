@@ -1,11 +1,11 @@
 function()
-
     system.disableChatCommandDisplay()
     tfm.exec.disableAfkDeath()
     tfm.exec.disableAutoNewGame()
     tfm.exec.disableAutoShaman()
     tfm.exec.newGame(0)
 
+    fileData = {}
 
     -- [[variables]] --
     local closeSequence = {}
@@ -61,6 +61,11 @@ function()
         addTextArea(1, res, target, 200, 100, 400, 200, true)
     end
 
+    loadFiles = function()
+        print("Loading files...")
+        system.loadFile(2)
+    end
+
     -- [[events]] --
 
     eventNewGame = function(name)
@@ -82,6 +87,15 @@ function()
             tfm.exec.setRoomPassword(args[2])
         elseif args[1] == "np" and module.subRoomAdmins[name] then
             tfm.exec.newGame(args[2])
+        elseif cmd == "leaderboard pewpew" and fileData[2] then
+            print("printing lboard")
+            local chunk = fileData[2]
+            local i = 0
+            while i < #chunk do
+                tfm.exec.chatMessage("\r\n" .. chunk:sub(i, i + 998), name)
+                i = i + 999
+            end
+			  tfm.exec.chatMessage(string.char(26), name)
         end
     end
 
@@ -100,6 +114,14 @@ function()
         end
     end
 
+    eventFileLoaded = function(id, data)
+        fileData[tonumber(id)] = data:match("^(.+)\n.+")
+    end
+
     eventPlayerDied = tfm.exec.respawnPlayer
 
+    if module.roomAdmin:find("bot") then
+        loadFiles()
+        system.newTimer(loadFiles, 1000 * 60 * 15, true)
+    end
 end
