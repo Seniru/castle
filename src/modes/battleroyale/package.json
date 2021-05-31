@@ -1,0 +1,7 @@
+{
+    "name": "battleroyale",
+    "version": "v0.1",
+    "description": "A battleroyale game",
+    "author": "Poklava#0000",
+    "main": "index.lua"
+}
