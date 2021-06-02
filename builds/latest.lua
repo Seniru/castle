@@ -531,7 +531,7 @@ eventNewPlayer = function(name)
         updatePlaying(name)
         newPlayer = true
     end
-    tfm.exec.chatMessage(chatMsg, name)
+    tfm.exec.chatMessage(chatMsg[players[name].community], name)
 end
 
 for name in next, tfm.get.room.playerList do
