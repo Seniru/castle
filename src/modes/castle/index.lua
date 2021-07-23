@@ -79,7 +79,7 @@ function()
     end 
 
     eventChatCommand = function(name, cmd)
-        local args = string.split(cmd, " ")
+        local args = stringutils.split(cmd, " ")
         if args[1] == "modes" then
             displayModes(name)
         elseif args[1] == "pw" and module.subRoomAdmins[name] then
@@ -105,7 +105,7 @@ function()
         elseif evt == "modes" then
             displayModes(name)
         elseif evt:find("%w+:%w+") then
-            local key, value = table.unpack(string.split(evt, ":"))
+            local key, value = table.unpack(stringutils.split(evt, ":"))
             if key == "play" then
                 tfm.exec.chatMessage("<N>[</N><D>•</D><N>]</N><D> /room #castle0" .. value .. "@" .. name .. "</D>", name)
             elseif key == "modeinfo" then

@@ -34,9 +34,11 @@ end
 
 -- [[ utilites]] --
 local utils = {}
-string.format = function(s, tab) return (s:gsub('($%b{})', function(w) return tab[w:sub(3, -2)] or w end)) end
+local stringutils = {}
 
-string.split = function(s, delimiter)
+stringutils.format = function(s, tab) return (s:gsub('($%b{})', function(w) return tab[w:sub(3, -2)] or w end)) end
+
+stringutils.split = function(s, delimiter)
     result = {}
     for match in (s .. delimiter):gmatch("(.-)" .. delimiter) do
         table.insert(result, match)
@@ -177,7 +179,7 @@ module.translate = function(term, language, page, kwargs)
     local translation = translations[lang] and translations[lang][term] or translations.en[term]
     translation = page and translation[page] or translation
     if not translation then return end
-    return string.format(translation, kwargs)
+    return stringutils.format(translation, kwargs)
 end
 
 
@@ -1694,7 +1696,7 @@ modes.castle.main = function()
     end 
 
     eventChatCommand = function(name, cmd)
-        local args = string.split(cmd, " ")
+        local args = stringutils.split(cmd, " ")
         if args[1] == "modes" then
             displayModes(name)
         elseif args[1] == "pw" and module.subRoomAdmins[name] then
@@ -1720,7 +1722,7 @@ modes.castle.main = function()
         elseif evt == "modes" then
             displayModes(name)
         elseif evt:find("%w+:%w+") then
-            local key, value = table.unpack(string.split(evt, ":"))
+            local key, value = table.unpack(stringutils.split(evt, ":"))
             if key == "play" then
                 tfm.exec.chatMessage("<N>[</N><D>•</D><N>]</N><D> /room #castle0" .. value .. "@" .. name .. "</D>", name)
             elseif key == "modeinfo" then
@@ -3117,7 +3119,7 @@ modes.fashion.main = function()
 
     eventChatCommand = function(name, cmd)
         local commu = tfm.get.room.playerList[name].community
-        local args = string.split(cmd, " ")
+        local args = stringutils.split(cmd, " ")
         if chatCmds[args[1]] then
             local cmd = args[1]
             table.remove(args, 1)
@@ -3143,7 +3145,7 @@ modes.fashion.main = function()
             ui.removeTextArea(6)
             round.displayConfigMenu(name)
         elseif evt:find("^%w+:.+") then
-            local key, value = table.unpack(string.split(evt, ":"))
+            local key, value = table.unpack(stringutils.split(evt, ":"))
             if key == "fs" then
                 if module.subRoomAdmins[name] and config[value] then
                     config[value](name, commu)
@@ -3588,7 +3590,7 @@ modes.graphs.main = function()
 
     eventTextAreaCallback = function(id, name, evt)
         if evt:find("%w+:.+") then
-            local key, value = table.unpack(string.split(evt, ":"))
+            local key, value = table.unpack(stringutils.split(evt, ":"))
             if key == "graph" and module.subRoomAdmins[name] then
                 graphs[value]()
                 series:setName(value)
@@ -3598,7 +3600,7 @@ modes.graphs.main = function()
 
     eventChatCommand = function(name, cmd)
         local commu = tfm.get.room.playerList[name].community
-        local args = string.split(cmd, " ")
+        local args = stringutils.split(cmd, " ")
         print(table.tostring(args))
         if args[1] == "commands" then
             tfm.exec.chatMessage(module.translate("cmds0graphs"), name)

@@ -126,7 +126,7 @@ function()
 
     eventTextAreaCallback = function(id, name, evt)
         if evt:find("%w+:.+") then
-            local key, value = table.unpack(string.split(evt, ":"))
+            local key, value = table.unpack(stringutils.split(evt, ":"))
             if key == "graph" and module.subRoomAdmins[name] then
                 graphs[value]()
                 series:setName(value)
@@ -136,7 +136,7 @@ function()
 
     eventChatCommand = function(name, cmd)
         local commu = tfm.get.room.playerList[name].community
-        local args = string.split(cmd, " ")
+        local args = stringutils.split(cmd, " ")
         print(table.tostring(args))
         if args[1] == "commands" then
             tfm.exec.chatMessage(module.translate("cmds0graphs"), name)

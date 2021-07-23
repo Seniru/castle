@@ -741,7 +741,7 @@ function()
 
     eventChatCommand = function(name, cmd)
         local commu = tfm.get.room.playerList[name].community
-        local args = string.split(cmd, " ")
+        local args = stringutils.split(cmd, " ")
         if chatCmds[args[1]] then
             local cmd = args[1]
             table.remove(args, 1)
@@ -767,7 +767,7 @@ function()
             ui.removeTextArea(6)
             round.displayConfigMenu(name)
         elseif evt:find("^%w+:.+") then
-            local key, value = table.unpack(string.split(evt, ":"))
+            local key, value = table.unpack(stringutils.split(evt, ":"))
             if key == "fs" then
                 if module.subRoomAdmins[name] and config[value] then
                     config[value](name, commu)
