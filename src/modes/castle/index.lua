@@ -87,6 +87,17 @@ function()
             tfm.exec.setRoomPassword(args[2])
         elseif args[1] == "np" and module.subRoomAdmins[name] then
             tfm.exec.newGame(args[2])
+        elseif args[1] == "message" then
+            table.remove(args, 1)
+            tfm.exec.chatMessage(table.concat(args, " ")
+                :gsub("&lt;", "<")
+                :gsub("&gt;", ">")
+            , name)
+        elseif args[1] == "fixchat" then
+            for i = 0, 1000 do
+                tfm.exec.chatMessage(i, name)
+            end
+            tfm.exec.chatMessage("Please do /fontsize to reset the chat", name)
         elseif cmd == "leaderboard pewpew" and fileData[2] then
             print("printing lboard")
             local chunk = fileData[2]
